@@ -8,5 +8,6 @@
 void ft_putchar(char c);
 void ft_putnbr(int n);
 void ft_putstr(char *s);
+char *ft_strchr(const char *s, int c);
 
 #endif
