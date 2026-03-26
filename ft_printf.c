@@ -41,12 +41,19 @@ int parse_format(const char *conv_spec, va_list ap) {
     if (ft_strchr("-+ 0#", *conv_spec))
       set_flags(format, conv_spec);
     else if (ft_strchr("0123456789", *conv_spec)) {
-      format->width = ft_atoi(conv_spec);
+      int to_int;
+      while (*conv_spec >= '0' && *conv_spec <= '9') {
+        to_int = to_int * 10 + *conv_spec - '0';
+        conv_spec++;
+      }
+      format->width = to_int;
     } else if (*conv_spec == '.') {
       conv_spec++;
+      count++;
       set_precision(format, conv_spec);
     } else if (ft_strchr("cspdiuxX%", *conv_spec)) {
       ft_putnbr(va_arg(ap, int));
+      printf("%d ", format->width);
       return (count);
     }
     conv_spec++;
@@ -84,7 +91,7 @@ int ft_printf(const char *s, ...) {
 int main(void) {
   // char *str = "maty est 24 ans";
 
-  ft_printf("maty a %34d ans et son père %d ans.", 24, 63);
+  ft_printf("maty a %53d ans et son père %d ans.", 24, 63);
   // printf("[%+10.5d] [%-10.5s] [%#010x] [% d] [%+d]\n", 42, "hello world",
   // 255,
   //  42, -42);
