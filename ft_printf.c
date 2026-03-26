@@ -14,43 +14,46 @@ typedef struct s_format {
 
 t_format *create_struct() { return (ft_calloc(1, sizeof(t_format))); }
 
-void set_flags(t_format *format, const char *specifier) {
-  if (*specifier == '-')
+void set_flags(t_format *format, const char *conv_spec) {
+  if (*conv_spec == '-')
     format->left_justify = 1;
-  else if (*specifier == '+')
+  else if (*conv_spec == '+')
     format->force_sign = 1;
-  else if (*specifier == ' ')
+  else if (*conv_spec == ' ')
     format->sign_space = 1;
-  else if (*specifier == '0')
+  else if (*conv_spec == '0')
     format->zero_padding = 1;
-  else if (*specifier == '#')
+  else if (*conv_spec == '#')
     format->alternate_form = 1;
 }
 
-void set_precision(t_format *format, const char *specifer) {
+void set_precision(t_format *format, const char *conv_spec) {
   format->has_precision = 1;
-  format->precision = ft_atoi(specifer);
+  format->precision = ft_atoi(conv_spec);
 }
+void set_specifier(t_format *format, const char *conv_spec) {}
 
-void parse_specifier(const char *specifier, va_list ap) {
+int parse_format(const char *conv_spec, va_list ap) {
+  int count = 1;
   t_format *format = create_struct();
-  int width;
 
-  while (*specifier) {
-    if (ft_strchr("-+ 0#", *specifier))
-      set_flags(format, specifier);
-    else if (ft_strchr("0123456789", *specifier)) {
-      width = ft_atoi(specifier);
-      printf("%d", width);
-    } else if (*specifier == '.') {
-      specifier++;
-      set_precision(format, specifier);
-    } else if (ft_strchr("cspdiuxX%", *specifier)) {
+  while (*conv_spec) {
+    if (ft_strchr("-+ 0#", *conv_spec))
+      set_flags(format, conv_spec);
+    else if (ft_strchr("0123456789", *conv_spec)) {
+      format->width = ft_atoi(conv_spec);
+    } else if (*conv_spec == '.') {
+      conv_spec++;
+      set_precision(format, conv_spec);
+    } else if (ft_strchr("cspdiuxX%", *conv_spec)) {
       ft_putnbr(va_arg(ap, int));
-      break;
+      return (count);
     }
-    specifier++;
+    conv_spec++;
+    count++;
   }
+
+  return (count);
 }
 
 void print_str(const char *s, va_list ap) {
@@ -59,8 +62,8 @@ void print_str(const char *s, va_list ap) {
   while (s[i] != '\0') {
     if (s[i] == '%') {
       i++;
-      parse_specifier(&s[i], ap);
-      i++;
+      int count = parse_format(&s[i], ap);
+      i += count;
     }
     ft_putchar(s[i]);
     i++;
@@ -81,7 +84,7 @@ int ft_printf(const char *s, ...) {
 int main(void) {
   // char *str = "maty est 24 ans";
 
-  ft_printf("maty a %10d ans et son père %d ans", 24, 63);
+  ft_printf("maty a %34d ans et son père %d ans.", 24, 63);
   // printf("[%+10.5d] [%-10.5s] [%#010x] [% d] [%+d]\n", 42, "hello world",
   // 255,
   //  42, -42);
