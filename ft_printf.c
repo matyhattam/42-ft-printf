@@ -27,33 +27,51 @@ void set_flags(t_format *format, const char *conv_spec) {
     format->alternate_form = 1;
 }
 
-void set_precision(t_format *format, const char *conv_spec) {
-  format->has_precision = 1;
-  format->precision = ft_atoi(conv_spec);
+int str_to_int(int *fmt_field, const char *conv_spec) {
+  int to_int = 0;
+  int offset = 0;
+  while (*conv_spec >= '0' && *conv_spec <= '9') {
+    to_int = to_int * 10 + *conv_spec - '0';
+    offset++;
+    conv_spec++;
+  }
+  *fmt_field = to_int;
+  return (offset);
 }
-void set_specifier(t_format *format, const char *conv_spec) {}
+
+void apply_format(t_format *format, va_list ap) {}
 
 int parse_format(const char *conv_spec, va_list ap) {
   int count = 1;
+  int offset = 0;
   t_format *format = create_struct();
+  if (!format)
+    return (NULL);
 
   while (*conv_spec) {
     if (ft_strchr("-+ 0#", *conv_spec))
       set_flags(format, conv_spec);
     else if (ft_strchr("0123456789", *conv_spec)) {
-      int to_int;
-      while (*conv_spec >= '0' && *conv_spec <= '9') {
-        to_int = to_int * 10 + *conv_spec - '0';
-        conv_spec++;
-      }
-      format->width = to_int;
+      offset = str_to_int(&format->width, conv_spec);
+      conv_spec += offset;
+      count += offset;
+      continue;
     } else if (*conv_spec == '.') {
       conv_spec++;
       count++;
-      set_precision(format, conv_spec);
+      offset = str_to_int(&format->precision, conv_spec);
+      conv_spec += offset;
+      count += offset;
+      continue;
     } else if (ft_strchr("cspdiuxX%", *conv_spec)) {
+      format->specifier = *conv_spec;
+      // printf("left_justify: %d \n", format->left_justify);
+      // printf("force_sign: %d \n", format->force_sign);
+      // printf("sign_space: %d \n", format->sign_space);
+      // printf("zero_padd: %d \n", format->zero_padding);
+      // printf("alter_form: %d \n", format->alternate_form);
+
       ft_putnbr(va_arg(ap, int));
-      printf("%d ", format->width);
       return (count);
     }
     conv_spec++;
@@ -91,7 +109,7 @@ int ft_printf(const char *s, ...) {
 int main(void) {
   // char *str = "maty est 24 ans";
 
-  ft_printf("maty a %53d ans et son père %d ans.", 24, 63);
+  ft_printf("maty a %-+#053.32 d ans et son père %d ans.", 24, 63);
   // printf("[%+10.5d] [%-10.5s] [%#010x] [% d] [%+d]\n", 42, "hello world",
   // 255,
   //  42, -42);
