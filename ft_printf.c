@@ -1,44 +1,5 @@
 #include "ft_printf.h"
 
-typedef struct s_format {
-  int left_justify;
-  int force_sign;
-  int sign_space;
-  int zero_padding;
-  int alternate_form;
-  int width;
-  int precision;
-  int has_precision;
-  char specifier;
-} t_format;
-
-t_format *create_struct() { return (ft_calloc(1, sizeof(t_format))); }
-
-void set_flags(t_format *format, const char *conv_spec) {
-  if (*conv_spec == '-')
-    format->left_justify = 1;
-  else if (*conv_spec == '+')
-    format->force_sign = 1;
-  else if (*conv_spec == ' ')
-    format->sign_space = 1;
-  else if (*conv_spec == '0')
-    format->zero_padding = 1;
-  else if (*conv_spec == '#')
-    format->alternate_form = 1;
-}
-
-int str_to_int(int *fmt_field, const char *conv_spec) {
-  int to_int = 0;
-  int offset = 0;
-  while (*conv_spec >= '0' && *conv_spec <= '9') {
-    to_int = to_int * 10 + *conv_spec - '0';
-    offset++;
-    conv_spec++;
-  }
-  *fmt_field = to_int;
-  return (offset);
-}
-
 char *apply_padding(int padding_len, size_t len, int is_precision) {
   char *s = "";
   if (padding_len >= len) {
@@ -57,7 +18,6 @@ char *apply_padding(int padding_len, size_t len, int is_precision) {
 
 char *apply_width(int *width, size_t len) {
   char *s = "";
-  // if (*width > len)
   s = apply_padding(*width, len, 0);
   return (s);
 }

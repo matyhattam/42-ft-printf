@@ -7,6 +7,24 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+typedef struct s_format {
+  int left_justify;
+  int force_sign;
+  int sign_space;
+  int zero_padding;
+  int alternate_form;
+  int width;
+  int precision;
+  int has_precision;
+  char specifier;
+} t_format;
+
+// ft_printf_utils
+t_format *create_struct();
+void set_flags(t_format *format, const char *conv_spec);
+int str_to_int(int *fmt_field, const char *conv_spec);
+
+// libft
 int ft_atoi(const char *nstr);
 void *ft_calloc(size_t nmemb, size_t size);
 char *ft_itoa(int n);
