@@ -39,14 +39,77 @@ int str_to_int(int *fmt_field, const char *conv_spec) {
   return (offset);
 }
 
-void apply_format(t_format *format, va_list ap) {}
+char *apply_width(int *width, size_t len) {
+  char *s = NULL;
+  if (*width > len) {
+    size_t len_pad = *width - len;
+    s = malloc(len_pad * sizeof(char));
+    size_t i = 0;
+    while (i < len_pad) {
+      s[i] = '0';
+      i++;
+    }
+    s[i] = '\0';
+  }
+
+  return (s);
+}
+
+void format_d(int d, t_format *format) {
+  char *s = ft_itoa(d);
+
+  char *width = apply_width(&format->width, ft_strlen(s));
+  if (width) {
+    char *output = ft_strjoin(width, s);
+    ft_putstr(output);
+  } else {
+
+    ft_putstr(s);
+  }
+  // char *output = ft_strjoin(width, s);
+  // printf("[%s]", output);
+  // if (format->width > ft_strlen(s)) {
+  //   size_t len_pad = format->width - ft_strlen(s);
+
+  //   printf("[%zd]", len_pad);
+  //   char *width = malloc(len_pad * sizeof(char));
+  //   size_t i = 0;
+  //   while (i < len_pad) {
+  //     width[i] = '0';
+  //     i++;
+  //   }
+  //   width[i] = '\0';
+
+  //   char *output = ft_strjoin(width, s);
+
+  //   printf("[%s]", output);
+  // }
+}
+
+void apply_format(t_format *format, va_list ap) {
+  if (format->specifier == 'c') {
+    char c = va_arg(ap, int);
+  } else if (format->specifier == 's') {
+    char *s = va_arg(ap, char *);
+  } else if (format->specifier == 'p') {
+    char *p = va_arg(ap, void *);
+  } else if (format->specifier == 'd' || format->specifier == 'i') {
+    format_d(va_arg(ap, int), format);
+  } else if (format->specifier == 'u') {
+    unsigned int u = va_arg(ap, unsigned int);
+  } else if (format->specifier == 'x' || format->specifier == 'X') {
+    char *x = va_arg(ap, char *);
+  } else if (format->specifier == '%') {
+    write(1, "%", 1);
+  }
+}
 
 int parse_format(const char *conv_spec, va_list ap) {
   int count = 1;
   int offset = 0;
   t_format *format = create_struct();
   if (!format)
-    return (NULL);
+    return (0);
 
   while (*conv_spec) {
     if (ft_strchr("-+ 0#", *conv_spec))
@@ -65,13 +128,15 @@ int parse_format(const char *conv_spec, va_list ap) {
       continue;
     } else if (ft_strchr("cspdiuxX%", *conv_spec)) {
       format->specifier = *conv_spec;
+      // printf("%c", format->specifier);
+      apply_format(format, ap);
       // printf("left_justify: %d \n", format->left_justify);
       // printf("force_sign: %d \n", format->force_sign);
       // printf("sign_space: %d \n", format->sign_space);
       // printf("zero_padd: %d \n", format->zero_padding);
       // printf("alter_form: %d \n", format->alternate_form);
 
-      ft_putnbr(va_arg(ap, int));
+      // ft_putnbr(va_arg(ap, int));
       return (count);
     }
     conv_spec++;
@@ -109,8 +174,8 @@ int ft_printf(const char *s, ...) {
 int main(void) {
   // char *str = "maty est 24 ans";
 
-  ft_printf("maty a %-+#053.32 d ans et son père %d ans.", 24, 63);
-  // printf("[%+10.5d] [%-10.5s] [%#010x] [% d] [%+d]\n", 42, "hello world",
+  ft_printf("maty a [%+10.5d] ans et son père %d ans. \n", 24, 63);
+  // printf("[%+4.5d] [%-10.5s] [%#010x] [% d] [%+d]\n", 42, "hello world",
   // 255,
   //  42, -42);
   // printf("[%d] [%s] [%x] [%d] [%d]\n", 42, "hello world", 255, 42,
