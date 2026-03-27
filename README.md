@@ -51,6 +51,10 @@ make fclean # removes object files and libftprintf.a
 make re     # fclean + make
 ```
 
+## Tests
+The project has been tested using:
+ - https://github.com/Tripouille/printfTester
+
 ## Notes
 
 This project is done purely for learning purposes, following the 42 cursus as a self-study resource. I am not affiliated with 42 School.
