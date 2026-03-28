@@ -1,48 +1,72 @@
 #include "ft_printf.h"
 
-char *apply_padding(int padding_len, size_t len, int is_precision) {
-  if (padding_len <= 0 || padding_len <= len)
+char *apply_padding(t_format *format, char type, size_t input_len,
+                    int is_precision) {
+  int output_len = type == 'w' ? format->width : format->precision;
+  int zpad = format->zero_padding;
+
+  if (output_len <= 0 || output_len <= input_len)
     return (NULL);
 
-  size_t pad_len = padding_len - len;
-  char *s = malloc((pad_len + 1) * sizeof(char));
-  ft_memset(s, is_precision ? '0' : ' ', pad_len);
-  s[pad_len] = '\0';
+  size_t pad_len = output_len - input_len;
+  char *output = malloc((pad_len + 1) * sizeof(char));
+  ft_memset(output,
+            is_precision || (!format->has_precision && zpad) ? '0' : ' ',
+            pad_len);
+  output[pad_len] = '\0';
 
-  return (s);
-}
-
-char *apply_width(int *width, size_t len) {
-  char *s = apply_padding(*width, len, 0);
-  return (s);
-}
-
-char *apply_precision(int *precision, char *affix, size_t len) {
-  char *s = apply_padding(*precision, len, 1);
-  char *output = ft_strjoin(s, affix);
+  printf("%s ", output);
   return (output);
+}
+
+char *apply_width(t_format *format, size_t len) {
+  return (apply_padding(format, 'w', len, 0));
+}
+
+char *apply_precision(t_format *format, char *affix, size_t len) {
+  char *s = apply_padding(format, 'p', len, 1);
+  return (ft_strjoin(s, affix));
+}
+
+char *apply_force_sign(int d, char *s, t_format *format) {
+  if (format->sign_space && !format->force_sign) {
+    return ft_strjoin(" ", s);
+  } else if (format->force_sign)
+    return ft_strjoin(d > 0 ? "+" : "-", s);
+  return (s);
 }
 
 char *format_d(int d, t_format *format) {
   char *s = ft_itoa(d);
 
-  char *width = apply_width(&format->width, ft_strlen(s));
-  char *precision = apply_precision(&format->precision, s, ft_strlen(s));
+  if (format->has_precision)
+    s = apply_precision(format, s, ft_strlen(s));
+  if (format->force_sign || format->sign_space)
+    s = apply_force_sign(d, s, format);
+  if (format->width)
+    s = ft_strjoin(apply_width(format, ft_strlen(s)), s);
 
-  if (!width) {
-    return (precision);
-  }
-  if (!precision) {
-    return (width);
-  }
-  return (ft_strjoin(width, precision));
+  return (s);
+}
+
+char *format_s(char *s, t_format *format) {
+  char *out;
+
+  // printf("%d", format->specifier);
+  // printf("%zu", ft_strlen(s));
+  if (format->has_precision)
+    out = apply_precision(format, s, ft_strlen(s));
+  if (format->width)
+    out = ft_strjoin(apply_width(format, ft_strlen(s)), s);
+
+  return (out);
 }
 
 char *apply_format(t_format *format, va_list ap) {
   if (format->specifier == 'c') {
     char c = va_arg(ap, int);
   } else if (format->specifier == 's') {
-    char *s = va_arg(ap, char *);
+    return (format_s(va_arg(ap, char *), format));
   } else if (format->specifier == 'p') {
     char *p = va_arg(ap, void *);
   } else if (format->specifier == 'd' || format->specifier == 'i') {
@@ -75,23 +99,26 @@ int parse_format(const char *conv_spec, va_list ap) {
     } else if (*conv_spec == '.') {
       conv_spec++;
       count++;
+      format->has_precision = 1;
       offset = str_to_int(&format->precision, conv_spec);
       conv_spec += offset;
       count += offset;
       continue;
     } else if (ft_strchr("cspdiuxX%", *conv_spec)) {
       format->specifier = *conv_spec;
-      // printf("[%d]", format->width);
-      // printf("[%d]", format->precision);
-      char *output = apply_format(format, ap);
-      ft_putstr(output);
+
       // printf("left_justify: %d \n", format->left_justify);
       // printf("force_sign: %d \n", format->force_sign);
       // printf("sign_space: %d \n", format->sign_space);
       // printf("zero_padd: %d \n", format->zero_padding);
       // printf("alter_form: %d \n", format->alternate_form);
+      // printf("width: %d \n", format->width);
+      // printf("precision: %d \n", format->precision);
+      // printf("specifier: %c \n", format->specifier);
 
-      // ft_putnbr(va_arg(ap, int));
+      char *output = apply_format(format, ap);
+      ft_putstr(output);
+
       return (count);
     }
     conv_spec++;
@@ -129,10 +156,12 @@ int ft_printf(const char *s, ...) {
 int main(void) {
   // char *str = "maty est 24 ans";
 
-  ft_printf("maty a [%+10.5d] ans et son père [%.5d] ans. \n", 24, 63);
-  // printf("[%+4.5d] [%-10.5s] [%#010x] [% d] [%+d]\n", 42, "hello world",
-  // 255,
-  //  42, -42);
+  // ft_printf("maty a [% +d] ans et son père [%d] ans. \n", 24, 63);
+  printf("-------------------- \n");
+  ft_printf("[%10.5s] \n", "hello world");
+  printf("-------------------- \n");
+  printf("[% 010.5d] [%-10.5s] [%#010x] [% d] [% d]\n", -42, "hello world", 255,
+         42, -42);
   // printf("[%d] [%s] [%x] [%d] [%d]\n", 42, "hello world", 255, 42,
   // -42);
 }
