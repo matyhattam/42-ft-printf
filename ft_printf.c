@@ -62,6 +62,13 @@ char *apply_precision(t_format *format, char *input, size_t input_len) {
       output[precision] = '\0';
       return (output);
     }
+  } else if (spec == 's') {
+    if (precision < input_len) {
+      char *output = malloc(precision + 1);
+      ft_memcpy(output, input, precision);
+      output[precision] = '\0';
+      return (output);
+    }
   }
   return (input);
 }
@@ -89,17 +96,11 @@ char *format_d(int d, t_format *format) {
 }
 
 char *format_s(char *s, t_format *format) {
-  char *out;
-
-  // printf("%d", format->specifier);
-  // printf("%zu", ft_strlen(s));
-  // if (format->has_precision)
-  // out = apply_precision(format, s, ft_strlen(s));
-  // if (format->width)
-  //   out = ft_strjoin(apply_width(format, s, ft_strlen(s)), s);
-
-  return (out);
-  // return (s);
+  if (format->has_precision)
+    s = apply_precision(format, s, ft_strlen(s));
+  if (format->width)
+    s = apply_width(format, s, ft_strlen(s));
+  return (s);
 }
 
 char *apply_format(t_format *format, va_list ap) {
@@ -199,7 +200,7 @@ int main(void) {
   printf("-------------------- \n");
   ft_printf("maty a [%+010.5d] ans et son père [%d] ans. \n", 24, 63);
   printf("-------------------- \n");
-  // ft_printf("[%10.5s] \n", "hello world");
+  ft_printf("[%10.5s] \n", "hello world");
   printf("-------------------- \n");
   printf("[%+010.5d] [%-10.5s] [%#010x] [% d] [% d]\n", 24, "hello world", 255,
          42, -42);
