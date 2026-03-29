@@ -41,7 +41,8 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
 
   if (width > input_len) {
     char *output = malloc(width + 1);
-    ft_memset(output, format->zero_padding ? '0' : ' ', width - input_len);
+    ft_memset(output, format->zero_padding && !format->force_sign ? '0' : ' ',
+              width - input_len);
     output = ft_strjoin(output, input);
     output[width] = '\0';
     return (output);
@@ -200,8 +201,8 @@ int main(void) {
   printf("-------------------- \n");
   // ft_printf("[%10.5s] \n", "hello world");
   printf("-------------------- \n");
-  printf("[%+.5d] [%-10.5s] [%#010x] [% d] [% d]\n", 24, "hello world", 255, 42,
-         -42);
+  printf("[%+010.5d] [%-10.5s] [%#010x] [% d] [% d]\n", 24, "hello world", 255,
+         42, -42);
   // printf("[%d] [%s] [%x] [%d] [%d]\n", 42, "hello world", 255, 42,
   // -42);
 }
