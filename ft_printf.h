@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 typedef struct s_format {
-  int left_justify;
+  int justify_left;
   int force_sign;
   int sign_space;
   int zero_padding;

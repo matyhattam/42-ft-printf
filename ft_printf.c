@@ -8,8 +8,8 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
     char *output = malloc(width + 1);
     ft_memset(output, format->zero_padding && !format->force_sign ? '0' : ' ',
               width - input_len);
-    // output = ft_strjoin(output, input);
-    output = format->left_justify ? ft_strjoin(input, output)
+    printf("%d", format->justify_left);
+    output = format->justify_left ? ft_strjoin(input, output)
                                   : ft_strjoin(output, input);
     output[width] = '\0';
     return (output);

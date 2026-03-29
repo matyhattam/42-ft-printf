@@ -4,7 +4,7 @@ t_format *create_struct() { return (ft_calloc(1, sizeof(t_format))); }
 
 void set_flags(t_format *format, const char *conv_spec) {
   if (*conv_spec == '-')
-    format->left_justify = 1;
+    format->justify_left = 1;
   else if (*conv_spec == '+')
     format->force_sign = 1;
   else if (*conv_spec == ' ')
