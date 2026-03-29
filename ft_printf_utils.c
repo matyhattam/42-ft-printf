@@ -27,23 +27,12 @@ int str_to_int(int *fmt_field, const char *conv_spec) {
   return (offset);
 }
 
-// char *apply_padding(t_format *format, char type, size_t input_len,
-//                     int is_precision) {
-//   int output_len = type == 'w' ? format->width : format->precision;
-//   int zpad = format->zero_padding;
+char *char_to_str(char c) {
+  char *s = malloc(2);
+  if (!s)
+    return NULL;
 
-//   if (output_len <= 0 || output_len <= input_len)
-//     return (NULL);
-
-//   size_t pad_len = output_len - input_len;
-//   char *output = malloc((pad_len + 1) * sizeof(char));
-//   if (format->specifier == 'd' || format->specifier == 'i') {
-//     ft_memset(output,
-//               is_precision || (!format->has_precision && zpad) ? '0' : ' ',
-//               pad_len);
-//   }
-//   output[pad_len] = '\0';
-
-//   printf("%s ", output);
-//   return (output);
-// }
+  s[0] = c;
+  s[1] = '\0';
+  return s;
+}

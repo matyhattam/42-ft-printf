@@ -8,7 +8,6 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
     char *output = malloc(width + 1);
     ft_memset(output, format->zero_padding && !format->force_sign ? '0' : ' ',
               width - input_len);
-    printf("%d", format->justify_left);
     output = format->justify_left ? ft_strjoin(input, output)
                                   : ft_strjoin(output, input);
     output[width] = '\0';
@@ -70,9 +69,16 @@ char *format_s(char *s, t_format *format) {
   return (s);
 }
 
+char *format_c(int c, t_format *format) {
+  char *s = char_to_str(c);
+  if (format->width)
+    s = apply_width(format, s, 1);
+  return (s);
+}
+
 char *apply_format(t_format *format, va_list ap) {
   if (format->specifier == 'c') {
-    char c = va_arg(ap, int);
+    return (format_c(va_arg(ap, int), format));
   } else if (format->specifier == 's') {
     return (format_s(va_arg(ap, char *), format));
   } else if (format->specifier == 'p') {
@@ -115,7 +121,7 @@ int parse_format(const char *conv_spec, va_list ap) {
     } else if (ft_strchr("cspdiuxX%", *conv_spec)) {
       format->specifier = *conv_spec;
 
-      // printf("left_justify: %d \n", format->left_justify);
+      // printf("left_justify: %d \n", format->justify_left);
       // printf("force_sign: %d \n", format->force_sign);
       // printf("sign_space: %d \n", format->sign_space);
       // printf("zero_padd: %d \n", format->zero_padding);
@@ -162,15 +168,17 @@ int ft_printf(const char *s, ...) {
 
 int main(void) {
   // char *str = "maty est 24 ans";
-
   ft_printf("maty a [%+.5d] ans et son père [%d] ans. \n", 24000000, 63);
   printf("-------------------- \n");
   ft_printf("maty a [%+010.5d] ans et son père [%d] ans. \n", 24, 63);
   printf("-------------------- \n");
   ft_printf("[%-10.5s] \n", "hello world");
   printf("-------------------- \n");
-  printf("[%+010.5d] [%-10.5s] [%#010x] [% d] [% d]\n", 24, "hello world", 255,
-         42, -42);
+  ft_printf("[%-10.5c] \n", 'c');
+  printf("-------------------- \n");
+  printf("-------------------- \n");
+  printf("[%+010.5d] [%-10.5s] [%#010x] [% d] [% d] [%-10c]\n", 24,
+         "hello world", 255, 42, -42, 'c');
   // printf("[%d] [%s] [%x] [%d] [%d]\n", 42, "hello world", 255, 42,
   // -42);
 }

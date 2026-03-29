@@ -20,8 +20,7 @@ typedef struct s_format {
 } t_format;
 
 // ft_printf_utils
-// char *apply_padding(t_format *format, char type, size_t input_len,
-// int is_precision);
+char *char_to_str(char c);
 t_format *create_struct();
 void set_flags(t_format *format, const char *conv_spec);
 int str_to_int(int *fmt_field, const char *conv_spec);
