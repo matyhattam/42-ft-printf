@@ -1,14 +1,14 @@
-LIB = ft-printf
+LIBFTPRINTF       = libftprintf.a
 
 all:
 	clang -Wall -Wextra -Wextra -Werror -c *.c
-	ar rcs ${LIB}.a *.o
+	ar rcs ${LIBFTPRINTF} *.o
 
 clean:
 	rm -f *.o
 
 fclean: clean
-	rm -f ${LIB}.a
+	rm -f ${LIBFTPRINTF}
 
 re: fclean all
 
