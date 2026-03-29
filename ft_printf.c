@@ -1,31 +1,68 @@
 #include "ft_printf.h"
 
-char *apply_padding(t_format *format, char type, size_t input_len,
+char *apply_padding(t_format *format, char type, char *input, size_t input_len,
                     int is_precision) {
   int output_len = type == 'w' ? format->width : format->precision;
   int zpad = format->zero_padding;
-
-  if (output_len <= 0 || output_len <= input_len)
+  char *output = malloc(10000000);
+  size_t pad_len;
+  // if (output_len <= 0 || output_len <= input_len)
+  if (output_len <= 0)
     return (NULL);
 
-  size_t pad_len = output_len - input_len;
-  char *output = malloc((pad_len + 1) * sizeof(char));
-  ft_memset(output,
-            is_precision || (!format->has_precision && zpad) ? '0' : ' ',
-            pad_len);
+  if (output_len > input_len) {
+    pad_len = output_len - input_len;
+    // *output = malloc((pad_len + 1) * sizeof(char));
+    if (format->specifier == 'd' || format->specifier == 'i') {
+      ft_memset(output,
+                is_precision || (!format->has_precision && zpad) ? '0' : ' ',
+                pad_len);
+    }
+  } else {
+    pad_len = format->precision;
+    printf("%d", format->precision);
+    // printf("%d", pad_len);
+    // output = malloc((pad_len + 1) * sizeof(char));
+    ft_strlcpy(output, input, pad_len);
+  }
+
+  // if (format->specifier == 's') {
+  //   ft_strlcpy(output, input, pad_len);
+  // }
+
   output[pad_len] = '\0';
 
-  printf("%s ", output);
   return (output);
 }
 
-char *apply_width(t_format *format, size_t len) {
-  return (apply_padding(format, 'w', len, 0));
+char *apply_width(t_format *format, char *input, size_t input_len) {
+  char spec = format->specifier;
+  int width = format->width;
+
+  if (width > input_len) {
+    char *output = malloc(width + 1);
+    ft_memset(output, format->zero_padding ? '0' : ' ', width - input_len);
+    output = ft_strjoin(output, input);
+    output[width] = '\0';
+    return (output);
+  }
+  return (input);
 }
 
-char *apply_precision(t_format *format, char *affix, size_t len) {
-  char *s = apply_padding(format, 'p', len, 1);
-  return (ft_strjoin(s, affix));
+char *apply_precision(t_format *format, char *input, size_t input_len) {
+  char spec = format->specifier;
+  int precision = format->precision;
+
+  if (spec == 'd' || spec == 'i') {
+    if (precision > input_len) {
+      char *output = malloc(precision + 1);
+      ft_memset(output, '0', precision - input_len);
+      output = ft_strjoin(output, input);
+      output[precision] = '\0';
+      return (output);
+    }
+  }
+  return (input);
 }
 
 char *apply_force_sign(int d, char *s, t_format *format) {
@@ -38,13 +75,14 @@ char *apply_force_sign(int d, char *s, t_format *format) {
 
 char *format_d(int d, t_format *format) {
   char *s = ft_itoa(d);
+  size_t input_len = ft_strlen(s);
 
   if (format->has_precision)
-    s = apply_precision(format, s, ft_strlen(s));
+    s = apply_precision(format, s, input_len);
   if (format->force_sign || format->sign_space)
     s = apply_force_sign(d, s, format);
   if (format->width)
-    s = ft_strjoin(apply_width(format, ft_strlen(s)), s);
+    s = apply_width(format, s, ft_strlen(s));
 
   return (s);
 }
@@ -54,12 +92,13 @@ char *format_s(char *s, t_format *format) {
 
   // printf("%d", format->specifier);
   // printf("%zu", ft_strlen(s));
-  if (format->has_precision)
-    out = apply_precision(format, s, ft_strlen(s));
-  if (format->width)
-    out = ft_strjoin(apply_width(format, ft_strlen(s)), s);
+  // if (format->has_precision)
+  // out = apply_precision(format, s, ft_strlen(s));
+  // if (format->width)
+  //   out = ft_strjoin(apply_width(format, s, ft_strlen(s)), s);
 
   return (out);
+  // return (s);
 }
 
 char *apply_format(t_format *format, va_list ap) {
@@ -115,7 +154,6 @@ int parse_format(const char *conv_spec, va_list ap) {
       // printf("width: %d \n", format->width);
       // printf("precision: %d \n", format->precision);
       // printf("specifier: %c \n", format->specifier);
-
       char *output = apply_format(format, ap);
       ft_putstr(output);
 
@@ -156,12 +194,14 @@ int ft_printf(const char *s, ...) {
 int main(void) {
   // char *str = "maty est 24 ans";
 
-  // ft_printf("maty a [% +d] ans et son père [%d] ans. \n", 24, 63);
+  ft_printf("maty a [%+.5d] ans et son père [%d] ans. \n", 24000000, 63);
   printf("-------------------- \n");
-  ft_printf("[%10.5s] \n", "hello world");
+  ft_printf("maty a [%+010.5d] ans et son père [%d] ans. \n", 24, 63);
   printf("-------------------- \n");
-  printf("[% 010.5d] [%-10.5s] [%#010x] [% d] [% d]\n", -42, "hello world", 255,
-         42, -42);
+  // ft_printf("[%10.5s] \n", "hello world");
+  printf("-------------------- \n");
+  printf("[%+.5d] [%-10.5s] [%#010x] [% d] [% d]\n", 24, "hello world", 255, 42,
+         -42);
   // printf("[%d] [%s] [%x] [%d] [%d]\n", 42, "hello world", 255, 42,
   // -42);
 }
