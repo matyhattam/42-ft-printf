@@ -76,6 +76,18 @@ char *format_c(int c, t_format *format) {
   return (s);
 }
 
+// TODO: manage # and manage X(uppercase)
+char *format_x(unsigned int x, t_format *format) {
+  char *hex = ft_to_hex(x);
+
+  if (format->has_precision)
+    hex = apply_precision(format, hex, ft_strlen(hex));
+  if (format->width)
+    hex = apply_width(format, hex, ft_strlen(hex));
+
+  return (hex);
+}
+
 char *apply_format(t_format *format, va_list ap) {
   if (format->specifier == 'c') {
     return (format_c(va_arg(ap, int), format));
@@ -88,7 +100,7 @@ char *apply_format(t_format *format, va_list ap) {
   } else if (format->specifier == 'u') {
     unsigned int u = va_arg(ap, unsigned int);
   } else if (format->specifier == 'x' || format->specifier == 'X') {
-    char *x = va_arg(ap, char *);
+    return (format_x(va_arg(ap, unsigned int), format));
   } else if (format->specifier == '%') {
     write(1, "%", 1);
   }
@@ -175,6 +187,8 @@ int main(void) {
   ft_printf("[%-10.5s] \n", "hello world");
   printf("-------------------- \n");
   ft_printf("[%-10.5c] \n", 'c');
+  printf("-------------------- \n");
+  ft_printf("[%010x] \n", 255);
   printf("-------------------- \n");
   printf("-------------------- \n");
   printf("[%+010.5d] [%-10.5s] [%#010x] [% d] [% d] [%-10c]\n", 24,

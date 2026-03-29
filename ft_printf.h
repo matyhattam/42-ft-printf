@@ -22,8 +22,10 @@ typedef struct s_format {
 // ft_printf_utils
 char *char_to_str(char c);
 t_format *create_struct();
+void ft_rev_str(char *s);
 void set_flags(t_format *format, const char *conv_spec);
 int str_to_int(int *fmt_field, const char *conv_spec);
+char *ft_to_hex(unsigned int x);
 
 // libft
 int ft_atoi(const char *nstr);
