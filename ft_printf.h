@@ -30,6 +30,7 @@ int str_to_int(int *fmt_field, const char *conv_spec);
 int ft_atoi(const char *nstr);
 void *ft_calloc(size_t nmemb, size_t size);
 char *ft_itoa(int n);
+void *ft_memcpy(void *dest, const void *src, size_t n);
 void *ft_memset(void *s, int c, size_t n);
 void ft_putchar(char c);
 void ft_putnbr(int n);
