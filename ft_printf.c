@@ -94,6 +94,20 @@ char *format_x(unsigned int x, t_format *format) {
   return (hex);
 }
 
+char *format_u(unsigned int u, t_format *format) {
+  char *s = ft_itoa(u);
+  size_t input_len = ft_strlen(s);
+
+  if (format->has_precision)
+    s = apply_precision(format, s, input_len);
+  if (format->force_sign || format->sign_space)
+    s = apply_force_sign(u, s, format);
+  if (format->width)
+    s = apply_width(format, s, ft_strlen(s));
+
+  return (s);
+}
+
 char *apply_format(t_format *format, va_list *ap) {
   if (format->specifier == 'c') {
     return (format_c(va_arg(*ap, int), format));
@@ -104,6 +118,7 @@ char *apply_format(t_format *format, va_list *ap) {
   } else if (format->specifier == 'd' || format->specifier == 'i') {
     return (format_d(va_arg(*ap, int), format));
   } else if (format->specifier == 'u') {
+    return (format_u(va_arg(*ap, unsigned int), format));
     // unsigned int u = va_arg(ap, unsigned int);
   } else if (format->specifier == 'x' || format->specifier == 'X') {
     return (format_x(va_arg(*ap, unsigned int), format));
@@ -193,7 +208,10 @@ int main(void) {
   printf("-------------------- \n");
   ft_printf("[%-#10.5X] [%#.3X] \n", 255, 355);
   printf("-------------------- \n");
+  ft_printf("[%10.5i] [%u]  \n", -1, -1);
   printf("-------------------- \n");
-  printf("[%+010.5d] [%-10.5s] [%#-010.5X] [%#.3X] [% d] [% d] [%-10c]\n", 24,
-         "hello world", 255, 355, 42, -42, 'c');
+  printf("-------------------- \n");
+  printf("[%+010.5d] [%-10.5s] [%-#10.5X] [%#.3X] [% d] [% d] [%-10c] [%10.5i] "
+         "[%u]\n",
+         24, "hello world", 255, 355, 42, -42, 'c', -1, -1);
 }
