@@ -28,3 +28,12 @@ char *ft_to_hex(unsigned int x) {
 
   return (hex);
 }
+
+void to_upper(char *hex) {
+  int i = 0;
+  while (hex[i] != '\0') {
+    if (hex[i] >= 'a' && hex[i] <= 'f' || hex[i] == 'x')
+      hex[i] -= 32;
+    i++;
+  }
+}

@@ -1,8 +1,8 @@
 #include "ft_printf.h"
 
 char *apply_width(t_format *format, char *input, size_t input_len) {
-  char spec = format->specifier;
-  int width = format->width;
+  // char spec = format->specifier;
+  size_t width = format->width;
 
   if (width > input_len) {
     char *output = malloc(width + 1);
@@ -18,9 +18,9 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
 
 char *apply_precision(t_format *format, char *input, size_t input_len) {
   char spec = format->specifier;
-  int precision = format->precision;
+  size_t precision = format->precision;
 
-  if (spec == 'd' || spec == 'i') {
+  if (spec == 'd' || spec == 'i' || spec == 'x' || spec == 'X') {
     if (precision > input_len) {
       char *output = malloc(precision + 1);
       ft_memset(output, '0', precision - input_len);
@@ -41,9 +41,9 @@ char *apply_precision(t_format *format, char *input, size_t input_len) {
 
 char *apply_force_sign(int d, char *s, t_format *format) {
   if (format->sign_space && !format->force_sign) {
-    return ft_strjoin(" ", s);
+    return (ft_strjoin(" ", s));
   } else if (format->force_sign)
-    return ft_strjoin(d > 0 ? "+" : "-", s);
+    return (ft_strjoin(d > 0 ? "+" : "-", s));
   return (s);
 }
 
@@ -77,6 +77,19 @@ char *format_c(int c, t_format *format) {
 }
 
 // TODO: manage # and manage X(uppercase)
+char *apply_alt_form(t_format *format, char *hex) {
+  if (format->width && !format->zero_padding &&
+      format->width - format->precision > 2) {
+    printf("%d", format->width);
+    printf("%zu", ft_strlen(hex));
+    printf("true");
+    hex[1] = 'x';
+  } else {
+    return (ft_strjoin("0x", hex));
+  }
+  return (hex);
+}
+
 char *format_x(unsigned int x, t_format *format) {
   char *hex = ft_to_hex(x);
 
@@ -84,6 +97,11 @@ char *format_x(unsigned int x, t_format *format) {
     hex = apply_precision(format, hex, ft_strlen(hex));
   if (format->width)
     hex = apply_width(format, hex, ft_strlen(hex));
+  if (format->alternate_form) {
+    hex = apply_alt_form(format, hex);
+  }
+  if (format->specifier == 'X')
+    to_upper(hex);
 
   return (hex);
 }
@@ -94,11 +112,11 @@ char *apply_format(t_format *format, va_list ap) {
   } else if (format->specifier == 's') {
     return (format_s(va_arg(ap, char *), format));
   } else if (format->specifier == 'p') {
-    char *p = va_arg(ap, void *);
+    // char *p = va_arg(ap, void *);
   } else if (format->specifier == 'd' || format->specifier == 'i') {
     return (format_d(va_arg(ap, int), format));
   } else if (format->specifier == 'u') {
-    unsigned int u = va_arg(ap, unsigned int);
+    // unsigned int u = va_arg(ap, unsigned int);
   } else if (format->specifier == 'x' || format->specifier == 'X') {
     return (format_x(va_arg(ap, unsigned int), format));
   } else if (format->specifier == '%') {
@@ -167,15 +185,12 @@ void print_str(const char *s, va_list ap) {
   }
 }
 
-int ft_printf(const char *s, ...) {
+void ft_printf(const char *s, ...) {
   va_list ap;
-  int count;
 
   va_start(ap, s);
   print_str(s, ap);
   va_end(ap);
-
-  return (count);
 }
 
 int main(void) {
@@ -188,11 +203,9 @@ int main(void) {
   printf("-------------------- \n");
   ft_printf("[%-10.5c] \n", 'c');
   printf("-------------------- \n");
-  ft_printf("[%010x] \n", 255);
+  ft_printf("[%#10.5X] \n", 255);
   printf("-------------------- \n");
   printf("-------------------- \n");
-  printf("[%+010.5d] [%-10.5s] [%#010x] [% d] [% d] [%-10c]\n", 24,
-         "hello world", 255, 42, -42, 'c');
-  // printf("[%d] [%s] [%x] [%d] [%d]\n", 42, "hello world", 255, 42,
-  // -42);
+  printf("[%+010.5d] [%-10.5s] [%#10.5X] [%#X] [% d] [% d] [%-10c]\n", 24,
+         "hello world", 255, 255, 42, -42, 'c');
 }

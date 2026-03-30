@@ -26,6 +26,7 @@ void ft_rev_str(char *s);
 void set_flags(t_format *format, const char *conv_spec);
 int str_to_int(int *fmt_field, const char *conv_spec);
 char *ft_to_hex(unsigned int x);
+void to_upper(char *hex);
 
 // libft
 int ft_atoi(const char *nstr);
