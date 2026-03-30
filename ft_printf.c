@@ -1,12 +1,15 @@
 #include "ft_printf.h"
 
 char *apply_width(t_format *format, char *input, size_t input_len) {
-  // char spec = format->specifier;
   size_t width = format->width;
 
   if (width > input_len) {
     char *output = malloc(width + 1);
-    ft_memset(output, format->zero_padding && !format->force_sign ? '0' : ' ',
+    ft_memset(output,
+              format->zero_padding && !format->force_sign &&
+                      !format->alternate_form
+                  ? '0'
+                  : ' ',
               width - input_len);
     output = format->justify_left ? ft_strjoin(input, output)
                                   : ft_strjoin(output, input);
@@ -78,13 +81,15 @@ char *format_c(int c, t_format *format) {
 
 // TODO: manage # and manage X(uppercase)
 char *apply_alt_form(t_format *format, char *hex) {
-  if (format->width && !format->zero_padding &&
-      format->width - format->precision > 2) {
-    printf("%d", format->width);
-    printf("%zu", ft_strlen(hex));
-    printf("true");
-    hex[1] = 'x';
+  int width = format->width;
+  int precision = format->precision;
+
+  if (width && format->has_precision && !format->zero_padding &&
+      width - precision > 2) {
+    hex[width - precision - 1] = 'x';
+    hex[width - precision - 2] = '0';
   } else {
+    printf("-%s-", hex);
     return (ft_strjoin("0x", hex));
   }
   return (hex);
@@ -203,9 +208,9 @@ int main(void) {
   printf("-------------------- \n");
   ft_printf("[%-10.5c] \n", 'c');
   printf("-------------------- \n");
-  ft_printf("[%#10.5X] \n", 255);
+  ft_printf("[%#10.5X] [%#3X] \n", 255);
   printf("-------------------- \n");
   printf("-------------------- \n");
-  printf("[%+010.5d] [%-10.5s] [%#10.5X] [%#X] [% d] [% d] [%-10c]\n", 24,
+  printf("[%+010.5d] [%-10.5s] [%#010.5X] [%#3X] [% d] [% d] [%-10c]\n", 24,
          "hello world", 255, 255, 42, -42, 'c');
 }
