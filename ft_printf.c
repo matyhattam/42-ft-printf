@@ -88,7 +88,6 @@ char *format_x(unsigned int x, t_format *format) {
     hex = ft_strjoin("0x", hex);
   if (format->width)
     hex = apply_width(format, hex, ft_strlen(hex));
-
   if (format->specifier == 'X')
     to_upper(hex);
 
@@ -192,9 +191,9 @@ int main(void) {
   printf("-------------------- \n");
   ft_printf("[%-10.5c] \n", 'c');
   printf("-------------------- \n");
-  ft_printf("[%#10.5X] [%#.3X] \n", 255);
+  ft_printf("[%-#10.5X] [%#.3X] \n", 255);
   printf("-------------------- \n");
   printf("-------------------- \n");
-  printf("[%+010.5d] [%-10.5s] [%#010.5X] [%#.3X] [% d] [% d] [%-10c]\n", 24,
+  printf("[%+010.5d] [%-10.5s] [%#-010.5X] [%#.3X] [% d] [% d] [%-10c]\n", 24,
          "hello world", 255, 255, 42, -42, 'c');
 }
