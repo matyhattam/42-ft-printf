@@ -94,26 +94,26 @@ char *format_x(unsigned int x, t_format *format) {
   return (hex);
 }
 
-char *apply_format(t_format *format, va_list ap) {
+char *apply_format(t_format *format, va_list *ap) {
   if (format->specifier == 'c') {
-    return (format_c(va_arg(ap, int), format));
+    return (format_c(va_arg(*ap, int), format));
   } else if (format->specifier == 's') {
-    return (format_s(va_arg(ap, char *), format));
+    return (format_s(va_arg(*ap, char *), format));
   } else if (format->specifier == 'p') {
     // char *p = va_arg(ap, void *);
   } else if (format->specifier == 'd' || format->specifier == 'i') {
-    return (format_d(va_arg(ap, int), format));
+    return (format_d(va_arg(*ap, int), format));
   } else if (format->specifier == 'u') {
     // unsigned int u = va_arg(ap, unsigned int);
   } else if (format->specifier == 'x' || format->specifier == 'X') {
-    return (format_x(va_arg(ap, unsigned int), format));
+    return (format_x(va_arg(*ap, unsigned int), format));
   } else if (format->specifier == '%') {
     write(1, "%", 1);
   }
   return (NULL);
 }
 
-int parse_format(const char *conv_spec, va_list ap) {
+int parse_format(const char *conv_spec, va_list *ap) {
   int count = 1;
   int offset = 0;
   t_format *format = create_struct();
@@ -159,7 +159,7 @@ int parse_format(const char *conv_spec, va_list ap) {
   return (count);
 }
 
-void print_str(const char *s, va_list ap) {
+void print_str(const char *s, va_list *ap) {
   size_t i = 0;
 
   while (s[i] != '\0') {
@@ -177,7 +177,7 @@ void ft_printf(const char *s, ...) {
   va_list ap;
 
   va_start(ap, s);
-  print_str(s, ap);
+  print_str(s, &ap);
   va_end(ap);
 }
 
@@ -191,9 +191,9 @@ int main(void) {
   printf("-------------------- \n");
   ft_printf("[%-10.5c] \n", 'c');
   printf("-------------------- \n");
-  ft_printf("[%-#10.5X] [%#.3X] \n", 255);
+  ft_printf("[%-#10.5X] [%#.3X] \n", 255, 355);
   printf("-------------------- \n");
   printf("-------------------- \n");
   printf("[%+010.5d] [%-10.5s] [%#-010.5X] [%#.3X] [% d] [% d] [%-10c]\n", 24,
-         "hello world", 255, 255, 42, -42, 'c');
+         "hello world", 255, 355, 42, -42, 'c');
 }
