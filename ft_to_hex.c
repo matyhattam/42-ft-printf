@@ -17,6 +17,8 @@ char *ft_to_hex(unsigned long x) {
   char hex_digits[] = "0123456789abcdef";
 
   char *hex = malloc(hex_len(x) + 1);
+  if (!hex)
+    return (NULL);
 
   while (x != 0) {
     hex[i] = hex_digits[x % 16];
