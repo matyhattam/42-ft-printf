@@ -4,21 +4,24 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
   size_t width = format->width;
 
   if (width > input_len) {
-    char *output = malloc(width + 1);
-    if (!output)
+    char *buffer = malloc(width + 1);
+    if (!buffer)
       return (NULL);
 
-    ft_memset(output,
+    ft_memset(buffer,
               format->zero_padding && !format->force_sign &&
                       !format->alternate_form && !format->is_neg &&
                       !format->justify_left
                   ? '0'
                   : ' ',
               width - input_len);
-    output = format->justify_left ? ft_strjoin(input, output)
-                                  : ft_strjoin(output, input);
+    buffer[width - input_len] = '\0';
+
+    char *output = format->justify_left ? ft_strjoin(input, buffer)
+                                        : ft_strjoin(buffer, input);
     output[width] = '\0';
 
+    free(buffer);
     return (output);
   }
   return (input);
@@ -30,14 +33,13 @@ char *apply_precision(t_format *format, char *input, size_t input_len) {
 
   if (spec == 'd' || spec == 'i' || spec == 'x' || spec == 'X' || spec == 'u') {
     if (precision > input_len) {
-      char *output = malloc(precision + 1);
-      if (!output)
-        return (NULL);
-      ft_memset(output, '0', precision - input_len);
-      output = ft_strjoin(output, input);
-      if (!output)
-        return (NULL);
+      char *buffer = malloc(precision + 1);
+      ft_memset(buffer, '0', precision - input_len);
+      buffer[precision - input_len] = '\0';
+      char *output = ft_strjoin(output, input);
       output[precision] = '\0';
+
+      free(buffer);
       return (output);
     }
   } else if (spec == 's' || spec == 'p') {
