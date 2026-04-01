@@ -7,7 +7,7 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
     char *output = malloc(width + 1);
     ft_memset(output,
               format->zero_padding && !format->force_sign &&
-                      !format->alternate_form
+                      !format->alternate_form && !format->is_neg
                   ? '0'
                   : ' ',
               width - input_len);
@@ -51,11 +51,18 @@ char *apply_force_sign(int d, char *s, t_format *format) {
 }
 
 char *format_d(int d, t_format *format) {
+  if (d < 0) {
+    format->is_neg = 1;
+    d = d * (-1);
+  }
   char *s = ft_itoa(d);
   size_t input_len = ft_strlen(s);
 
-  if (format->has_precision)
+  if (format->has_precision) {
     s = apply_precision(format, s, input_len);
+    if (format->is_neg)
+      s = ft_strjoin("-", s);
+  }
   if (format->force_sign || format->sign_space)
     s = apply_force_sign(d, s, format);
   if (format->width)
@@ -95,7 +102,10 @@ char *format_x(unsigned int x, t_format *format) {
 }
 
 char *format_u(unsigned int u, t_format *format) {
+  if (u < 0)
+    u = u * -1;
   char *s = ft_itoa(u);
+
   size_t input_len = ft_strlen(s);
 
   if (format->has_precision)
@@ -198,7 +208,7 @@ void ft_printf(const char *s, ...) {
 
 int main(void) {
   // char *str = "maty est 24 ans";
-  ft_printf("maty a [%+.5d] ans et son père [%d] ans. \n", 24000000, 63);
+  ft_printf("maty a [%+.5d] ans et son père [%010.5d] ans. \n", 24000000, -63);
   printf("-------------------- \n");
   ft_printf("maty a [%+010.5d] ans et son père [%d] ans. \n", 24, 63);
   printf("-------------------- \n");
@@ -211,7 +221,8 @@ int main(void) {
   ft_printf("[%10.5i] [%u]  \n", -1, -1);
   printf("-------------------- \n");
   printf("-------------------- \n");
-  printf("[%+010.5d] [%-10.5s] [%-#10.5X] [%#.3X] [% d] [% d] [%-10c] [%10.5i] "
-         "[%u]\n",
-         24, "hello world", 255, 355, 42, -42, 'c', -1, -1);
+  printf(
+      "[%+010.5d] [%-10.5s] [%-#10.5X] [%#.3X] [% d] [%10.5d] [%-10c] [%10.5i] "
+      "[%u]\n",
+      24, "hello world", 255, 355, 42, -42, 'c', -1, -1);
 }
