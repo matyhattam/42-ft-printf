@@ -36,3 +36,32 @@ char *char_to_str(char c) {
   s[1] = '\0';
   return s;
 }
+
+int ulen(unsigned int u) {
+  int len = 0;
+  unsigned int tmp = u;
+  if (tmp == 0)
+    len = 1;
+  while (tmp != 0) {
+    tmp /= 16;
+    len++;
+  }
+  return (len);
+}
+
+char *u_to_str(unsigned int u) {
+  int i = 0;
+  char base10[] = "0123456789";
+
+  char *s = malloc(ulen(u) + 1);
+
+  while (u != 0) {
+    s[i] = base10[u % 10];
+    u /= 10;
+    i++;
+  }
+  ft_rev_str(s);
+  s[i] = '\0';
+
+  return (s);
+}
