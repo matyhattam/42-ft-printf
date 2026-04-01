@@ -7,7 +7,8 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
     char *output = malloc(width + 1);
     ft_memset(output,
               format->zero_padding && !format->force_sign &&
-                      !format->alternate_form && !format->is_neg
+                      !format->alternate_form && !format->is_neg &&
+                      !format->justify_left
                   ? '0'
                   : ' ',
               width - input_len);
@@ -23,7 +24,7 @@ char *apply_precision(t_format *format, char *input, size_t input_len) {
   char spec = format->specifier;
   size_t precision = format->precision;
 
-  if (spec == 'd' || spec == 'i' || spec == 'x' || spec == 'X') {
+  if (spec == 'd' || spec == 'i' || spec == 'x' || spec == 'X' || spec == 'u') {
     if (precision > input_len) {
       char *output = malloc(precision + 1);
       ft_memset(output, '0', precision - input_len);
@@ -101,17 +102,41 @@ char *format_x(unsigned int x, t_format *format) {
   return (hex);
 }
 
-char *format_u(unsigned int u, t_format *format) {
-  if (u < 0)
-    u = u * -1;
-  char *s = ft_itoa(u);
+int u_len(unsigned int u) {
+  int len = 0;
+  unsigned int tmp = u;
+  if (tmp == 0)
+    len = 1;
+  while (tmp != 0) {
+    tmp /= 16;
+    len++;
+  }
+  return (len);
+}
 
+char *u_to_str(unsigned int u) {
+  int i = 0;
+  char base10[] = "0123456789";
+
+  char *s = malloc(u_len(u) + 1);
+
+  while (u != 0) {
+    s[i] = base10[u % 10];
+    u /= 10;
+    i++;
+  }
+  ft_rev_str(s);
+  s[i] = '\0';
+
+  return (s);
+}
+
+char *format_u(unsigned int u, t_format *format) {
+  char *s = u_to_str(u);
   size_t input_len = ft_strlen(s);
 
   if (format->has_precision)
     s = apply_precision(format, s, input_len);
-  if (format->force_sign || format->sign_space)
-    s = apply_force_sign(u, s, format);
   if (format->width)
     s = apply_width(format, s, ft_strlen(s));
 
@@ -218,7 +243,8 @@ int main(void) {
   printf("-------------------- \n");
   ft_printf("[%-#10.5X] [%#.3X] \n", 255, 355);
   printf("-------------------- \n");
-  ft_printf("[%10.5i] [%u]  \n", -1, -1);
+  ft_printf("[%10.5i] [%-020u]  \n", -1, -1);
+  printf("[%10.5i] [%-020u]  \n", -1, -1);
   printf("-------------------- \n");
   printf("-------------------- \n");
   printf(
