@@ -107,7 +107,7 @@ char *format_d(int d, t_format *format) {
 char *format_s(char *s, t_format *format) {
   char *buffer;
   if (!s)
-    return ("(null)");
+    return (ft_strdup("(null)"));
 
   buffer = ft_strdup(s);
   if (!buffer)
@@ -123,13 +123,17 @@ char *format_s(char *s, t_format *format) {
 }
 
 char *format_c(int c, t_format *format) {
-  char *s = char_to_str(c);
-  printf("[%s]", s);
-
-  if (!s) {
-    printf("true");
-    return (NULL);
+  if (c == '0') {
+    char *s = malloc(1);
+    if (!s)
+      return (NULL);
+    s[0] = '\0';
+    return (s);
   }
+
+  char *s = char_to_str(c);
+  if (!s)
+    return (NULL);
 
   if (format->width)
     if (!replace(&s, apply_width(format, s, 1)))
@@ -193,8 +197,9 @@ char *apply_format(t_format *format, va_list *ap) {
     return (format_u(va_arg(*ap, unsigned int), format));
   } else if (format->specifier == 'x' || format->specifier == 'X') {
     return (format_x(ap, format, 0));
-  } else if (format->specifier == '%') {
-    write(1, "%", 1);
+    // } else if (format->specifier == '%') {
+    // write(1, "%", 1);
+    // return (ft_strdup("%"));
   }
   return (NULL);
 }
@@ -222,7 +227,10 @@ int parse_format(const char *conv_spec, va_list *ap) {
       conv_spec += offset;
       count += offset;
       continue;
-    } else if (ft_strchr("cspdiuxX%", *conv_spec)) {
+    } else if (*conv_spec == '%') {
+      // write(1, "%", 1);
+      return (count);
+    } else if (ft_strchr("cspdiuxX", *conv_spec)) {
       format->specifier = *conv_spec;
       char *output = apply_format(format, ap);
 
@@ -287,6 +295,9 @@ void ft_printf(const char *s, ...) {
 // }
 
 int main(void) {
-  ft_printf("%c", '0');
-  printf("%c", 0);
+  ft_printf("%c \n", '0');
+  printf("%c \n", 0);
+  printf("-------------------- \n");
+  ft_printf("%%%%%% \n");
+  printf("%%%%%% \n");
 }
