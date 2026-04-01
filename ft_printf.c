@@ -5,6 +5,9 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
 
   if (width > input_len) {
     char *output = malloc(width + 1);
+    if (!output)
+      return (NULL);
+
     ft_memset(output,
               format->zero_padding && !format->force_sign &&
                       !format->alternate_form && !format->is_neg &&
@@ -15,6 +18,7 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
     output = format->justify_left ? ft_strjoin(input, output)
                                   : ft_strjoin(output, input);
     output[width] = '\0';
+
     return (output);
   }
   return (input);
@@ -27,12 +31,16 @@ char *apply_precision(t_format *format, char *input, size_t input_len) {
   if (spec == 'd' || spec == 'i' || spec == 'x' || spec == 'X' || spec == 'u') {
     if (precision > input_len) {
       char *output = malloc(precision + 1);
+      if (!output)
+        return (NULL);
       ft_memset(output, '0', precision - input_len);
       output = ft_strjoin(output, input);
+      if (!output)
+        return (NULL);
       output[precision] = '\0';
       return (output);
     }
-  } else if (spec == 's') {
+  } else if (spec == 's' || spec == 'p') {
     if (precision < input_len) {
       char *output = malloc(precision + 1);
       ft_memcpy(output, input, precision);
@@ -57,6 +65,9 @@ char *format_d(int d, t_format *format) {
     d = d * (-1);
   }
   char *s = ft_itoa(d);
+  if (!s)
+    return (NULL);
+
   size_t input_len = ft_strlen(s);
 
   if (format->has_precision) {
@@ -82,17 +93,30 @@ char *format_s(char *s, t_format *format) {
 
 char *format_c(int c, t_format *format) {
   char *s = char_to_str(c);
+  if (!s)
+    return (NULL);
+
   if (format->width)
     s = apply_width(format, s, 1);
   return (s);
 }
 
-char *format_x(unsigned int x, t_format *format) {
-  char *hex = ft_to_hex(x);
+char *format_x(va_list *ap, t_format *format, int is_p) {
+  unsigned long x;
 
-  if (format->has_precision)
+  if (is_p) {
+    x = (unsigned long)va_arg(*ap, void *);
+  } else {
+    x = (unsigned long)va_arg(*ap, unsigned int);
+  }
+
+  char *hex = ft_to_hex(x);
+  if (!hex)
+    return (NULL);
+
+  if (format->has_precision && !is_p)
     hex = apply_precision(format, hex, ft_strlen(hex));
-  if (format->alternate_form)
+  if (format->alternate_form || is_p)
     hex = ft_strjoin("0x", hex);
   if (format->width)
     hex = apply_width(format, hex, ft_strlen(hex));
@@ -102,37 +126,10 @@ char *format_x(unsigned int x, t_format *format) {
   return (hex);
 }
 
-int u_len(unsigned int u) {
-  int len = 0;
-  unsigned int tmp = u;
-  if (tmp == 0)
-    len = 1;
-  while (tmp != 0) {
-    tmp /= 16;
-    len++;
-  }
-  return (len);
-}
-
-char *u_to_str(unsigned int u) {
-  int i = 0;
-  char base10[] = "0123456789";
-
-  char *s = malloc(u_len(u) + 1);
-
-  while (u != 0) {
-    s[i] = base10[u % 10];
-    u /= 10;
-    i++;
-  }
-  ft_rev_str(s);
-  s[i] = '\0';
-
-  return (s);
-}
-
 char *format_u(unsigned int u, t_format *format) {
   char *s = u_to_str(u);
+  if (!s)
+    return (NULL);
   size_t input_len = ft_strlen(s);
 
   if (format->has_precision)
@@ -149,14 +146,13 @@ char *apply_format(t_format *format, va_list *ap) {
   } else if (format->specifier == 's') {
     return (format_s(va_arg(*ap, char *), format));
   } else if (format->specifier == 'p') {
-    // char *p = va_arg(ap, void *);
+    return (format_x(ap, format, 1));
   } else if (format->specifier == 'd' || format->specifier == 'i') {
     return (format_d(va_arg(*ap, int), format));
   } else if (format->specifier == 'u') {
     return (format_u(va_arg(*ap, unsigned int), format));
-    // unsigned int u = va_arg(ap, unsigned int);
   } else if (format->specifier == 'x' || format->specifier == 'X') {
-    return (format_x(va_arg(*ap, unsigned int), format));
+    return (format_x(ap, format, 0));
   } else if (format->specifier == '%') {
     write(1, "%", 1);
   }
@@ -188,17 +184,10 @@ int parse_format(const char *conv_spec, va_list *ap) {
       continue;
     } else if (ft_strchr("cspdiuxX%", *conv_spec)) {
       format->specifier = *conv_spec;
-
-      // printf("left_justify: %d \n", format->justify_left);
-      // printf("force_sign: %d \n", format->force_sign);
-      // printf("sign_space: %d \n", format->sign_space);
-      // printf("zero_padd: %d \n", format->zero_padding);
-      // printf("alter_form: %d \n", format->alternate_form);
-      // printf("width: %d \n", format->width);
-      // printf("precision: %d \n", format->precision);
-      // printf("specifier: %c \n", format->specifier);
       char *output = apply_format(format, ap);
+
       ft_putstr(output);
+      // free(output);
 
       return (count);
     }
@@ -232,23 +221,27 @@ void ft_printf(const char *s, ...) {
 }
 
 int main(void) {
-  // char *str = "maty est 24 ans";
-  ft_printf("maty a [%+.5d] ans et son père [%010.5d] ans. \n", 24000000, -63);
+  ft_printf("maty a [%+.5d] ans et son père [%08.5d] ans. \n", 24000, -63);
+  printf("maty a [%+.5d] ans et son père [%08.5d] ans. \n", 24000, -63);
   printf("-------------------- \n");
   ft_printf("maty a [%+010.5d] ans et son père [%d] ans. \n", 24, 63);
+  printf("maty a [%+010.5d] ans et son père [%d] ans. \n", 24, 63);
   printf("-------------------- \n");
   ft_printf("[%-10.5s] \n", "hello world");
+  printf("[%-10.5s] \n", "hello world");
   printf("-------------------- \n");
-  ft_printf("[%-10.5c] \n", 'c');
+  ft_printf("[%-10c] \n", 'c');
+  printf("[%-10c] \n", 'c');
   printf("-------------------- \n");
   ft_printf("[%-#10.5X] [%#.3X] \n", 255, 355);
+  printf("[%-#10.5X] [%#.3X] \n", 255, 355);
   printf("-------------------- \n");
-  ft_printf("[%10.5i] [%-020u]  \n", -1, -1);
-  printf("[%10.5i] [%-020u]  \n", -1, -1);
+  ft_printf("[%10.5i] [%-020u]  \n", -1, -16);
+  printf("[%10.5i] [%-20u]  \n", -1, -16);
   printf("-------------------- \n");
+  int i = 10;
+  int *p = &i;
+  ft_printf("[%-20p] \n", &p);
+  printf("[%-20p] \n", &p);
   printf("-------------------- \n");
-  printf(
-      "[%+010.5d] [%-10.5s] [%-#10.5X] [%#.3X] [% d] [%10.5d] [%-10c] [%10.5i] "
-      "[%u]\n",
-      24, "hello world", 255, 355, 42, -42, 'c', -1, -1);
 }

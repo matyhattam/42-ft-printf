@@ -1,8 +1,8 @@
 #include "ft_printf.h"
 
-int hex_len(unsigned int x) {
+int hex_len(unsigned long x) {
   int len = 0;
-  unsigned int tmp = x;
+  unsigned long tmp = x;
   if (tmp == 0)
     len = 1;
   while (tmp != 0) {
@@ -12,7 +12,7 @@ int hex_len(unsigned int x) {
   return (len);
 }
 
-char *ft_to_hex(unsigned int x) {
+char *ft_to_hex(unsigned long x) {
   int i = 0;
   char hex_digits[] = "0123456789abcdef";
 
