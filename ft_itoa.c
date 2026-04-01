@@ -50,10 +50,8 @@ char *ft_itoa(int n) {
     i++;
   }
 
-  if (n < 0)
-    nstr[i] = '-';
+  nstr[i] = '\0';
   ft_rev_str(nstr);
 
-  nstr[i + 1] = '\0';
   return (nstr);
 }

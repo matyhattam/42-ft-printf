@@ -27,12 +27,12 @@ int str_to_int(int *fmt_field, const char *conv_spec) {
   return (offset);
 }
 
-char *char_to_str(char c) {
+char *char_to_str(int c) {
   char *s = malloc(2);
   if (!s)
     return NULL;
 
-  s[0] = c;
+  s[0] = (char)c;
   s[1] = '\0';
   return s;
 }
@@ -43,7 +43,7 @@ int ulen(unsigned int u) {
   if (tmp == 0)
     len = 1;
   while (tmp != 0) {
-    tmp /= 16;
+    tmp /= 10;
     len++;
   }
   return (len);
@@ -54,14 +54,23 @@ char *u_to_str(unsigned int u) {
   char base10[] = "0123456789";
 
   char *s = malloc(ulen(u) + 1);
+  if (!s)
+    return (NULL);
+
+  if (u == 0) {
+    s[0] = '0';
+    s[1] = '\0';
+    return (s);
+  }
 
   while (u != 0) {
     s[i] = base10[u % 10];
     u /= 10;
     i++;
   }
-  ft_rev_str(s);
+
   s[i] = '\0';
+  ft_rev_str(s);
 
   return (s);
 }

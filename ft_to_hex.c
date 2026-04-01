@@ -20,13 +20,19 @@ char *ft_to_hex(unsigned long x) {
   if (!hex)
     return (NULL);
 
+  if (x == 0) {
+    hex[0] = '0';
+    hex[1] = '\0';
+    return (hex);
+  }
+
   while (x != 0) {
     hex[i] = hex_digits[x % 16];
     x /= 16;
     i++;
   }
-  ft_rev_str(hex);
   hex[i] = '\0';
+  ft_rev_str(hex);
 
   return (hex);
 }
@@ -34,7 +40,7 @@ char *ft_to_hex(unsigned long x) {
 void to_upper(char *hex) {
   int i = 0;
   while (hex[i] != '\0') {
-    if (hex[i] >= 'a' && hex[i] <= 'f' || hex[i] == 'x')
+    if ((hex[i] >= 'a' && hex[i] <= 'f') || hex[i] == 'x')
       hex[i] -= 32;
     i++;
   }

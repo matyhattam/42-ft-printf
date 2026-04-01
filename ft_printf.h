@@ -21,7 +21,7 @@ typedef struct s_format {
 } t_format;
 
 // ft_printf_utils
-char *char_to_str(char c);
+char *char_to_str(int c);
 t_format *create_struct();
 void ft_rev_str(char *s);
 void set_flags(t_format *format, const char *conv_spec);
@@ -40,6 +40,7 @@ void ft_putchar(char c);
 void ft_putnbr(int n);
 void ft_putstr(char *s);
 char *ft_strchr(const char *s, int c);
+char *ft_strdup(char *s);
 char *ft_strjoin(char const *s1, char const *s2);
 size_t ft_strlcat(char *dest, const char *src, size_t size);
 size_t ft_strlcpy(char *dest, const char *src, size_t size);

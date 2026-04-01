@@ -3,28 +3,27 @@
 char *apply_width(t_format *format, char *input, size_t input_len) {
   size_t width = format->width;
 
-  if (width > input_len) {
-    char *buffer = malloc(width + 1);
-    if (!buffer)
-      return (NULL);
+  if (width <= input_len)
+    return (ft_strdup(input));
 
-    ft_memset(buffer,
-              format->zero_padding && !format->force_sign &&
-                      !format->alternate_form && !format->is_neg &&
-                      !format->justify_left
-                  ? '0'
-                  : ' ',
-              width - input_len);
-    buffer[width - input_len] = '\0';
+  char *buffer = malloc(width - input_len + 1);
+  if (!buffer)
+    return (NULL);
 
-    char *output = format->justify_left ? ft_strjoin(input, buffer)
-                                        : ft_strjoin(buffer, input);
-    output[width] = '\0';
+  ft_memset(buffer,
+            format->zero_padding && !format->force_sign &&
+                    !format->alternate_form && !format->is_neg &&
+                    !format->justify_left
+                ? '0'
+                : ' ',
+            width - input_len);
+  buffer[width - input_len] = '\0';
 
-    free(buffer);
-    return (output);
-  }
-  return (input);
+  char *output = format->justify_left ? ft_strjoin(input, buffer)
+                                      : ft_strjoin(buffer, input);
+
+  free(buffer);
+  return (output);
 }
 
 char *apply_precision(t_format *format, char *input, size_t input_len) {
@@ -33,12 +32,14 @@ char *apply_precision(t_format *format, char *input, size_t input_len) {
 
   if (spec == 'd' || spec == 'i' || spec == 'x' || spec == 'X' || spec == 'u') {
     if (precision > input_len) {
-      char *buffer = malloc(precision + 1);
+      char *buffer = malloc(precision - input_len + 1);
+      if (!buffer)
+        return (NULL);
+
       ft_memset(buffer, '0', precision - input_len);
       buffer[precision - input_len] = '\0';
-      char *output = ft_strjoin(output, input);
-      output[precision] = '\0';
 
+      char *output = ft_strjoin(buffer, input);
       free(buffer);
       return (output);
     }
@@ -50,56 +51,89 @@ char *apply_precision(t_format *format, char *input, size_t input_len) {
       return (output);
     }
   }
-  return (input);
+  return (ft_strdup(input));
 }
 
-char *apply_force_sign(int d, char *s, t_format *format) {
-  if (format->sign_space && !format->force_sign) {
-    return (ft_strjoin(" ", s));
-  } else if (format->force_sign)
-    return (ft_strjoin(d > 0 ? "+" : "-", s));
-  return (s);
+static int replace(char **src, char *new) {
+  if (!new)
+    return (0);
+  free(*src);
+  *src = new;
+  return (1);
+}
+
+char *apply_force_sign(char *s, t_format *format) {
+  char *out;
+
+  if (!s)
+    return (NULL);
+
+  if (format->sign_space && !format->force_sign)
+    out = ft_strjoin(" ", s);
+  else if (format->force_sign)
+    out = ft_strjoin("+", s);
+  else
+    return (ft_strdup(s));
+
+  return (out);
 }
 
 char *format_d(int d, t_format *format) {
   if (d < 0) {
     format->is_neg = 1;
-    d = d * (-1);
+    d = -d;
   }
   char *s = ft_itoa(d);
   if (!s)
     return (NULL);
 
-  size_t input_len = ft_strlen(s);
-
   if (format->has_precision) {
-    s = apply_precision(format, s, input_len);
+    if (!replace(&s, apply_precision(format, s, ft_strlen(s))))
+      return (NULL);
     if (format->is_neg)
-      s = ft_strjoin("-", s);
+      if (!replace(&s, ft_strjoin("-", s)))
+        return (NULL);
   }
   if (format->force_sign || format->sign_space)
-    s = apply_force_sign(d, s, format);
+    if (!replace(&s, apply_force_sign(s, format)))
+      return (NULL);
   if (format->width)
-    s = apply_width(format, s, ft_strlen(s));
+    if (!replace(&s, apply_width(format, s, ft_strlen(s))))
+      return (NULL);
 
   return (s);
 }
 
 char *format_s(char *s, t_format *format) {
+  char *buffer;
+  if (!s)
+    return ("(null)");
+
+  buffer = ft_strdup(s);
+  if (!buffer)
+    return (NULL);
+
   if (format->has_precision)
-    s = apply_precision(format, s, ft_strlen(s));
+    if (!replace(&buffer, apply_precision(format, buffer, ft_strlen(buffer))))
+      return (NULL);
   if (format->width)
-    s = apply_width(format, s, ft_strlen(s));
-  return (s);
+    if (!replace(&buffer, apply_width(format, buffer, ft_strlen(buffer))))
+      return (NULL);
+  return (buffer);
 }
 
 char *format_c(int c, t_format *format) {
   char *s = char_to_str(c);
-  if (!s)
+  printf("[%s]", s);
+
+  if (!s) {
+    printf("true");
     return (NULL);
+  }
 
   if (format->width)
-    s = apply_width(format, s, 1);
+    if (!replace(&s, apply_width(format, s, 1)))
+      return (NULL);
   return (s);
 }
 
@@ -117,11 +151,14 @@ char *format_x(va_list *ap, t_format *format, int is_p) {
     return (NULL);
 
   if (format->has_precision && !is_p)
-    hex = apply_precision(format, hex, ft_strlen(hex));
+    if (!replace(&hex, apply_precision(format, hex, ft_strlen(hex))))
+      return (NULL);
   if (format->alternate_form || is_p)
-    hex = ft_strjoin("0x", hex);
+    if (!replace(&hex, ft_strjoin("0x", hex)))
+      return (NULL);
   if (format->width)
-    hex = apply_width(format, hex, ft_strlen(hex));
+    if (!replace(&hex, apply_width(format, hex, ft_strlen(hex))))
+      return (NULL);
   if (format->specifier == 'X')
     to_upper(hex);
 
@@ -132,12 +169,13 @@ char *format_u(unsigned int u, t_format *format) {
   char *s = u_to_str(u);
   if (!s)
     return (NULL);
-  size_t input_len = ft_strlen(s);
 
   if (format->has_precision)
-    s = apply_precision(format, s, input_len);
+    if (!replace(&s, apply_precision(format, s, ft_strlen(s))))
+      return (NULL);
   if (format->width)
-    s = apply_width(format, s, ft_strlen(s));
+    if (!replace(&s, apply_width(format, s, ft_strlen(s))))
+      return (NULL);
 
   return (s);
 }
@@ -188,9 +226,12 @@ int parse_format(const char *conv_spec, va_list *ap) {
       format->specifier = *conv_spec;
       char *output = apply_format(format, ap);
 
-      ft_putstr(output);
+      if (output) {
+        ft_putstr(output);
+        free(output);
+      }
+
       free(format);
-      // free(output);
       return (count);
     }
     conv_spec++;
@@ -222,28 +263,30 @@ void ft_printf(const char *s, ...) {
   va_end(ap);
 }
 
+// int main(void) {
+//   ft_printf("maty a [%+.5d] ans et son père [%08.5d] ans. \n", 24000, -63);
+//   printf("maty a [%+.5d] ans et son père [%08.5d] ans. \n", 24000, -63);
+//   printf("-------------------- \n");
+//   ft_printf("[%-.5s] [%-10.5s] \n", "hello world", "maty hattam");
+//   printf("[%-.5s] [%-10.5s] \n", "hello world", "maty hattam");
+//   printf("-------------------- \n");
+//   ft_printf("[%-10c] \n", 'c');
+//   printf("[%-10c] \n", 'c');
+//   printf("-------------------- \n");
+//   ft_printf("[%-#10.5X] [%#.3X] \n", 255, 355);
+//   printf("[%-#10.5X] [%#.3X] \n", 255, 355);
+//   printf("-------------------- \n");
+//   ft_printf("[%10.5i] [%-020u]  \n", -1, -16);
+//   printf("[%10.5i] [%-20u]  \n", -1, -16);
+//   printf("-------------------- \n");
+//   int i = 10;
+//   int *p = &i;
+//   ft_printf("[%-20p] \n", &p);
+//   printf("[%-20p] \n", &p);
+//   printf("-------------------- \n");
+// }
+
 int main(void) {
-  ft_printf("maty a [%+.5d] ans et son père [%08.5d] ans. \n", 24000, -63);
-  printf("maty a [%+.5d] ans et son père [%08.5d] ans. \n", 24000, -63);
-  printf("-------------------- \n");
-  ft_printf("maty a [%+010.5d] ans et son père [%d] ans. \n", 24, 63);
-  printf("maty a [%+010.5d] ans et son père [%d] ans. \n", 24, 63);
-  printf("-------------------- \n");
-  ft_printf("[%-10.5s] \n", "hello world");
-  printf("[%-10.5s] \n", "hello world");
-  printf("-------------------- \n");
-  ft_printf("[%-10c] \n", 'c');
-  printf("[%-10c] \n", 'c');
-  printf("-------------------- \n");
-  ft_printf("[%-#10.5X] [%#.3X] \n", 255, 355);
-  printf("[%-#10.5X] [%#.3X] \n", 255, 355);
-  printf("-------------------- \n");
-  ft_printf("[%10.5i] [%-020u]  \n", -1, -16);
-  printf("[%10.5i] [%-20u]  \n", -1, -16);
-  printf("-------------------- \n");
-  int i = 10;
-  int *p = &i;
-  ft_printf("[%-20p] \n", &p);
-  printf("[%-20p] \n", &p);
-  printf("-------------------- \n");
+  ft_printf("%c", '0');
+  printf("%c", 0);
 }
