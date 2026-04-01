@@ -187,8 +187,8 @@ int parse_format(const char *conv_spec, va_list *ap) {
       char *output = apply_format(format, ap);
 
       ft_putstr(output);
+      free(format);
       // free(output);
-
       return (count);
     }
     conv_spec++;
