@@ -90,10 +90,10 @@ char *format_d(int d, t_format *format) {
   if (format->has_precision) {
     if (!replace(&s, apply_precision(format, s, ft_strlen(s))))
       return (NULL);
-    if (format->is_neg)
-      if (!replace(&s, ft_strjoin("-", s)))
-        return (NULL);
   }
+  if (format->is_neg)
+    if (!replace(&s, ft_strjoin("-", s)))
+      return (NULL);
   if (format->force_sign || format->sign_space)
     if (!replace(&s, apply_force_sign(s, format)))
       return (NULL);
@@ -123,7 +123,7 @@ char *format_s(char *s, t_format *format) {
 }
 
 char *format_c(int c, t_format *format) {
-  if (c == '0') {
+  if (c == '\0') {
     char *s = malloc(1);
     if (!s)
       return (NULL);
@@ -205,13 +205,14 @@ char *apply_format(t_format *format, va_list *ap) {
 }
 
 int parse_format(const char *conv_spec, va_list *ap) {
-  int count = 1;
+  int count = 0;
   int offset = 0;
+  int len = 0;
   t_format *format = create_struct();
   if (!format)
     return (0);
 
-  while (*conv_spec) {
+  while (*conv_spec && *conv_spec != '\0') {
     if (ft_strchr("-+ 0#", *conv_spec))
       set_flags(format, conv_spec);
     else if (ft_strchr("0123456789", *conv_spec)) {
@@ -228,19 +229,21 @@ int parse_format(const char *conv_spec, va_list *ap) {
       count += offset;
       continue;
     } else if (*conv_spec == '%') {
-      // write(1, "%", 1);
+      write(1, "%", 1);
+      count++;
       return (count);
     } else if (ft_strchr("cspdiuxX", *conv_spec)) {
       format->specifier = *conv_spec;
       char *output = apply_format(format, ap);
-
       if (output) {
+        len = ft_strlen(output);
+        // printf("[%d]", len);
         ft_putstr(output);
         free(output);
       }
-
       free(format);
-      return (count);
+
+      return (len);
     }
     conv_spec++;
     count++;
@@ -249,26 +252,35 @@ int parse_format(const char *conv_spec, va_list *ap) {
   return (count);
 }
 
-void print_str(const char *s, va_list *ap) {
+int print_str(const char *s, va_list *ap) {
   size_t i = 0;
+  int total = 0;
 
-  while (s[i] != '\0') {
+  while (s[i] && s[i] != '\0') {
     if (s[i] == '%') {
       i++;
       int count = parse_format(&s[i], ap);
       i += count;
+      total += count;
+      continue;
     }
     ft_putchar(s[i]);
+    total++;
     i++;
   }
+
+  return (total);
 }
 
-void ft_printf(const char *s, ...) {
+int ft_printf(const char *s, ...) {
   va_list ap;
+  int count = 0;
 
   va_start(ap, s);
-  print_str(s, &ap);
+  count = print_str(s, &ap);
   va_end(ap);
+
+  return (count);
 }
 
 // int main(void) {
@@ -294,10 +306,4 @@ void ft_printf(const char *s, ...) {
 //   printf("-------------------- \n");
 // }
 
-int main(void) {
-  ft_printf("%c \n", '0');
-  printf("%c \n", 0);
-  printf("-------------------- \n");
-  ft_printf("%%%%%% \n");
-  printf("%%%%%% \n");
-}
+// int main(void) { ft_printf("the char is: %c", 'a'); }
