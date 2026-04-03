@@ -1,8 +1,7 @@
 #include "ft_printf.h"
 
-char *apply_width(t_format *format, char *input, size_t input_len) {
-  size_t width = format->width;
-
+char *apply_width(t_format *fmt, char *input, size_t input_len) {
+  size_t width = fmt->width;
   if (width <= input_len)
     return (ft_strdup(input));
 
@@ -10,45 +9,44 @@ char *apply_width(t_format *format, char *input, size_t input_len) {
   if (!buffer)
     return (NULL);
 
-  ft_memset(buffer,
-            format->zero_padding && !format->force_sign &&
-                    !format->alternate_form && !format->justify_left &&
-                    !format->has_precision
-                ? '0'
-                : ' ',
-            width - input_len);
-
+  int is_zpadded = fmt->zero_padding && !fmt->force_sign &&
+                   !fmt->alternate_form && !fmt->justify_left &&
+                   !fmt->has_precision;
+  ft_memset(buffer, is_zpadded ? '0' : ' ', width - input_len);
   buffer[width - input_len] = '\0';
 
-  if (format->is_neg && format->zero_padding && !format->has_precision) {
+  if (fmt->is_neg && fmt->zero_padding && !fmt->has_precision) {
     buffer[0] = '-';
     input[0] = '0';
   }
 
-  char *output = format->justify_left ? ft_strjoin(input, buffer)
-                                      : ft_strjoin(buffer, input);
+  char *output =
+      fmt->justify_left ? ft_strjoin(input, buffer) : ft_strjoin(buffer, input);
 
   free(buffer);
   return (output);
 }
 
-char *apply_width_c(t_format *format, char *c) {
-  size_t width = format->width < 1 ? 1 : format->width;
+char *apply_width_c(t_format *fmt, char *c) {
+  size_t width = fmt->width < 1 ? 1 : fmt->width;
   char *buf = malloc(width + 1);
   if (!buf)
     return (NULL);
+
   ft_memset(buf, ' ', width);
   buf[width] = '\0';
-  if (format->justify_left)
+
+  if (fmt->justify_left)
     buf[0] = c[0];
   else
     buf[width - 1] = c[0];
+
   return (buf);
 }
 
-char *apply_precision(t_format *format, char *input, size_t input_len) {
-  char spec = format->specifier;
-  size_t precision = format->precision;
+char *apply_precision(t_format *fmt, char *input, size_t input_len) {
+  char spec = fmt->specifier;
+  size_t precision = fmt->precision;
 
   if (spec == 'd' || spec == 'i' || spec == 'x' || spec == 'X' || spec == 'u') {
     if (precision > input_len) {
@@ -61,13 +59,18 @@ char *apply_precision(t_format *format, char *input, size_t input_len) {
 
       char *output = ft_strjoin(buffer, input);
       free(buffer);
+
       return (output);
     }
   } else if (spec == 's' || spec == 'p') {
     if (precision < input_len && ft_strcmp(input, "(null)") != 0) {
       char *output = malloc(precision + 1);
+      if (!output)
+        return (NULL);
+
       ft_memcpy(output, input, precision);
       output[precision] = '\0';
+
       return (output);
     } else if (precision < input_len && ft_strcmp(input, "(null)") == 0) {
       return (NULL);
@@ -84,15 +87,15 @@ static int replace(char **src, char *new) {
   return (1);
 }
 
-char *apply_force_sign(char *s, t_format *format) {
+char *apply_force_sign(char *s, t_format *fmt) {
   char *out;
 
   if (!s)
     return (NULL);
 
-  if (format->sign_space && !format->force_sign && !format->is_neg)
+  if (fmt->sign_space && !fmt->force_sign && !fmt->is_neg)
     out = ft_strjoin(" ", s);
-  else if (format->force_sign && !format->is_neg)
+  else if (fmt->force_sign && !fmt->is_neg)
     out = ft_strjoin("+", s);
   else
     return (ft_strdup(s));
@@ -100,39 +103,37 @@ char *apply_force_sign(char *s, t_format *format) {
   return (out);
 }
 
-char *format_d(int d, t_format *format) {
+char *format_d(int d, t_format *fmt) {
   if (d < 0) {
-    format->is_neg = 1;
+    fmt->is_neg = 1;
     d = -d;
   }
   char *s = ft_itoa(d);
   if (!s)
     return (NULL);
 
-  if (format->has_precision && format->precision == 0 && d == 0) {
+  if (fmt->has_precision && fmt->precision == 0 && d == 0)
     if (!replace(&s, ft_strdup(""))) {
       free(s);
       return (NULL);
     }
-  }
-  if (format->has_precision) {
-    if (!replace(&s, apply_precision(format, s, ft_strlen(s))))
+  if (fmt->has_precision)
+    if (!replace(&s, apply_precision(fmt, s, ft_strlen(s))))
       return (NULL);
-  }
-  if (format->is_neg)
+  if (fmt->is_neg)
     if (!replace(&s, ft_strjoin("-", s)))
       return (NULL);
-  if (format->force_sign || format->sign_space)
-    if (!replace(&s, apply_force_sign(s, format)))
+  if (fmt->force_sign || fmt->sign_space)
+    if (!replace(&s, apply_force_sign(s, fmt)))
       return (NULL);
-  if (format->width)
-    if (!replace(&s, apply_width(format, s, ft_strlen(s))))
+  if (fmt->width)
+    if (!replace(&s, apply_width(fmt, s, ft_strlen(s))))
       return (NULL);
 
   return (s);
 }
 
-char *format_s(char *s, t_format *format) {
+char *format_s(char *s, t_format *fmt) {
   char *buffer;
   if (!s) {
     buffer = ft_strdup("(null)");
@@ -142,20 +143,20 @@ char *format_s(char *s, t_format *format) {
   if (!buffer)
     return (NULL);
 
-  if (format->has_precision)
-    if (!replace(&buffer, apply_precision(format, buffer, ft_strlen(buffer)))) {
+  if (fmt->has_precision)
+    if (!replace(&buffer, apply_precision(fmt, buffer, ft_strlen(buffer)))) {
       free(buffer);
       return (NULL);
     }
-  if (format->width)
-    if (!replace(&buffer, apply_width(format, buffer, ft_strlen(buffer)))) {
+  if (fmt->width)
+    if (!replace(&buffer, apply_width(fmt, buffer, ft_strlen(buffer)))) {
       free(buffer);
       return (NULL);
     }
   return (buffer);
 }
 
-char *format_c(int c, t_format *format) {
+char *format_c(int c, t_format *fmt) {
   char *s;
   if (c == '\0') {
     s = malloc(1);
@@ -169,13 +170,13 @@ char *format_c(int c, t_format *format) {
   if (!s)
     return (NULL);
 
-  if (format->width)
-    if (!replace(&s, apply_width_c(format, s)))
+  if (fmt->width)
+    if (!replace(&s, apply_width_c(fmt, s)))
       return (NULL);
   return (s);
 }
 
-char *format_x(va_list *ap, t_format *format, int is_p) {
+char *format_x(va_list *ap, t_format *fmt, int is_p) {
   unsigned long x;
   char *hex;
 
@@ -187,68 +188,66 @@ char *format_x(va_list *ap, t_format *format, int is_p) {
   if (x == 0 && is_p) {
     hex = ft_strdup("(nil)");
   } else {
-
     hex = ft_to_hex(x);
   }
 
   if (!hex)
     return (NULL);
 
-  if (format->has_precision && format->precision == 0 && x == 0) {
+  if (fmt->has_precision && fmt->precision == 0 && x == 0)
     if (!replace(&hex, ft_strdup(""))) {
       free(hex);
       return (NULL);
     }
-  }
-  if (format->has_precision && !is_p)
-    if (!replace(&hex, apply_precision(format, hex, ft_strlen(hex))))
+  if (fmt->has_precision && !is_p)
+    if (!replace(&hex, apply_precision(fmt, hex, ft_strlen(hex))))
       return (NULL);
-  if ((format->alternate_form && x != 0) || (x != 0 && is_p))
+  if ((fmt->alternate_form && x != 0) || (x != 0 && is_p))
     if (!replace(&hex, ft_strjoin("0x", hex)))
       return (NULL);
-  if (format->width)
-    if (!replace(&hex, apply_width(format, hex, ft_strlen(hex))))
+  if (fmt->width)
+    if (!replace(&hex, apply_width(fmt, hex, ft_strlen(hex))))
       return (NULL);
-  if (format->specifier == 'X')
+  if (fmt->specifier == 'X')
     to_upper(hex);
 
   return (hex);
 }
 
-char *format_u(unsigned int u, t_format *format) {
+char *format_u(unsigned int u, t_format *fmt) {
   char *s = u_to_str(u);
   if (!s)
     return (NULL);
 
-  if (format->has_precision && format->precision == 0 && u == 0) {
+  if (fmt->has_precision && fmt->precision == 0 && u == 0)
     if (!replace(&s, ft_strdup(""))) {
       free(s);
       return (NULL);
     }
-  }
-  if (format->has_precision)
-    if (!replace(&s, apply_precision(format, s, ft_strlen(s))))
+
+  if (fmt->has_precision)
+    if (!replace(&s, apply_precision(fmt, s, ft_strlen(s))))
       return (NULL);
-  if (format->width)
-    if (!replace(&s, apply_width(format, s, ft_strlen(s))))
+  if (fmt->width)
+    if (!replace(&s, apply_width(fmt, s, ft_strlen(s))))
       return (NULL);
 
   return (s);
 }
 
-char *apply_format(t_format *format, va_list *ap) {
-  if (format->specifier == 'c') {
-    return (format_c(va_arg(*ap, int), format));
-  } else if (format->specifier == 's') {
-    return (format_s(va_arg(*ap, char *), format));
-  } else if (format->specifier == 'p') {
-    return (format_x(ap, format, 1));
-  } else if (format->specifier == 'd' || format->specifier == 'i') {
-    return (format_d(va_arg(*ap, int), format));
-  } else if (format->specifier == 'u') {
-    return (format_u(va_arg(*ap, unsigned int), format));
-  } else if (format->specifier == 'x' || format->specifier == 'X') {
-    return (format_x(ap, format, 0));
+char *apply_format(t_format *fmt, va_list *ap) {
+  if (fmt->specifier == 'c') {
+    return (format_c(va_arg(*ap, int), fmt));
+  } else if (fmt->specifier == 's') {
+    return (format_s(va_arg(*ap, char *), fmt));
+  } else if (fmt->specifier == 'p') {
+    return (format_x(ap, fmt, 1));
+  } else if (fmt->specifier == 'd' || fmt->specifier == 'i') {
+    return (format_d(va_arg(*ap, int), fmt));
+  } else if (fmt->specifier == 'u') {
+    return (format_u(va_arg(*ap, unsigned int), fmt));
+  } else if (fmt->specifier == 'x' || fmt->specifier == 'X') {
+    return (format_x(ap, fmt, 0));
   }
   return (NULL);
 }
@@ -257,51 +256,51 @@ int parse_format(const char *conv_spec, va_list *ap) {
   int offset = 0;
   int len = 0;
   int bytes = 0;
-  t_format *format = create_struct();
-  if (!format)
+  t_format *fmt = create_struct();
+  if (!fmt)
     return (0);
 
   while (*conv_spec) {
     if (ft_strchr("-+ 0#", *conv_spec)) {
-      set_flags(format, conv_spec);
+      set_flags(fmt, conv_spec);
     } else if (ft_strchr("0123456789", *conv_spec)) {
-      offset = str_to_int(&format->width, conv_spec);
+      offset = str_to_int(&fmt->width, conv_spec);
       conv_spec += offset;
       continue;
     } else if (*conv_spec == '.') {
       conv_spec++;
-      format->has_precision = 1;
-      offset = str_to_int(&format->precision, conv_spec);
+      fmt->has_precision = 1;
+      offset = str_to_int(&fmt->precision, conv_spec);
       conv_spec += offset;
       continue;
     } else if (*conv_spec == '%') {
       write(1, "%", 1);
-      free(format);
+      free(fmt);
       return (1);
     } else if (ft_strchr("cspdiuxX", *conv_spec)) {
-      format->specifier = *conv_spec;
-      char *output = apply_format(format, ap);
+      fmt->specifier = *conv_spec;
+      char *output = apply_format(fmt, ap);
       if (!output) {
-        free(format);
+        free(fmt);
         return (0);
       }
-      if (format->specifier == 'c') {
-        bytes = write(1, output, format->width ? format->width : 1);
+      if (fmt->specifier == 'c') {
+        bytes = write(1, output, fmt->width ? fmt->width : 1);
         free(output);
-        free(format);
+        free(fmt);
         return (bytes);
       } else {
         len = ft_strlen(output);
         ft_putstr(output);
       }
       free(output);
-      free(format);
+      free(fmt);
       return (len);
     }
     conv_spec++;
   }
 
-  free(format);
+  free(fmt);
   return (0);
 }
 
@@ -314,9 +313,8 @@ int print_str(const char *s, va_list *ap) {
     if (s[i] == '%') {
       i++;
       slen += parse_format(&s[i], ap);
-      while (!ft_strchr("cspdiuxX%", s[i])) {
+      while (!ft_strchr("cspdiuxX%", s[i]))
         i++;
-      }
       i++;
       continue;
     }
