@@ -4,6 +4,8 @@ all:
 	clang -Wall -Wextra -Wextra -Werror -c *.c
 	ar rcs ${LIBFTPRINTF} *.o
 
+bonus: all
+
 clean:
 	rm -f *.o
 
