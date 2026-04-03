@@ -25,7 +25,7 @@ char *char_to_str(int c);
 t_format *create_struct();
 void ft_rev_str(char *s);
 void set_flags(t_format *format, const char *conv_spec);
-int str_to_int(int *fmt_field, const char *conv_spec);
+int parse_w_p(int *fmt_field, const char *conv_spec);
 char *ft_to_hex(unsigned long x);
 void to_upper(char *hex);
 char *u_to_str(unsigned int u);

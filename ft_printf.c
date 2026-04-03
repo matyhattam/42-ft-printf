@@ -235,7 +235,7 @@ char *format_u(unsigned int u, t_format *fmt) {
   return (s);
 }
 
-char *apply_format(t_format *fmt, va_list *ap) {
+char *parse_specs(t_format *fmt, va_list *ap) {
   if (fmt->specifier == 'c') {
     return (format_c(va_arg(*ap, int), fmt));
   } else if (fmt->specifier == 's') {
@@ -252,7 +252,7 @@ char *apply_format(t_format *fmt, va_list *ap) {
   return (NULL);
 }
 
-int parse_format(const char *conv_spec, va_list *ap) {
+int parse_fmt(const char *conv_spec, va_list *ap) {
   int offset = 0;
   int len = 0;
   int bytes = 0;
@@ -264,13 +264,13 @@ int parse_format(const char *conv_spec, va_list *ap) {
     if (ft_strchr("-+ 0#", *conv_spec)) {
       set_flags(fmt, conv_spec);
     } else if (ft_strchr("0123456789", *conv_spec)) {
-      offset = str_to_int(&fmt->width, conv_spec);
+      offset = parse_w_p(&fmt->width, conv_spec);
       conv_spec += offset;
       continue;
     } else if (*conv_spec == '.') {
       conv_spec++;
       fmt->has_precision = 1;
-      offset = str_to_int(&fmt->precision, conv_spec);
+      offset = parse_w_p(&fmt->precision, conv_spec);
       conv_spec += offset;
       continue;
     } else if (*conv_spec == '%') {
@@ -279,7 +279,7 @@ int parse_format(const char *conv_spec, va_list *ap) {
       return (1);
     } else if (ft_strchr("cspdiuxX", *conv_spec)) {
       fmt->specifier = *conv_spec;
-      char *output = apply_format(fmt, ap);
+      char *output = parse_specs(fmt, ap);
       if (!output) {
         free(fmt);
         return (0);
@@ -312,7 +312,7 @@ int print_str(const char *s, va_list *ap) {
   while (s[i]) {
     if (s[i] == '%') {
       i++;
-      slen += parse_format(&s[i], ap);
+      slen += parse_fmt(&s[i], ap);
       while (!ft_strchr("cspdiuxX%", s[i]))
         i++;
       i++;

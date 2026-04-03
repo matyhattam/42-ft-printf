@@ -15,7 +15,7 @@ void set_flags(t_format *format, const char *conv_spec) {
     format->alternate_form = 1;
 }
 
-int str_to_int(int *fmt_field, const char *conv_spec) {
+int parse_w_p(int *fmt_field, const char *conv_spec) {
   int to_int = 0;
   int offset = 0;
   while (*conv_spec >= '0' && *conv_spec <= '9') {
