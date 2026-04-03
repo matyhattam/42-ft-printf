@@ -2,31 +2,6 @@
 
 t_format *create_struct() { return (ft_calloc(1, sizeof(t_format))); }
 
-void set_flags(t_format *format, const char *conv_spec) {
-  if (*conv_spec == '-')
-    format->justify_left = 1;
-  else if (*conv_spec == '+')
-    format->force_sign = 1;
-  else if (*conv_spec == ' ')
-    format->sign_space = 1;
-  else if (*conv_spec == '0')
-    format->zero_padding = 1;
-  else if (*conv_spec == '#')
-    format->alternate_form = 1;
-}
-
-int parse_w_p(int *fmt_field, const char *conv_spec) {
-  int to_int = 0;
-  int offset = 0;
-  while (*conv_spec >= '0' && *conv_spec <= '9') {
-    to_int = to_int * 10 + *conv_spec - '0';
-    offset++;
-    conv_spec++;
-  }
-  *fmt_field = to_int;
-  return (offset);
-}
-
 char *char_to_str(int c) {
   char *s = malloc(2);
   if (!s)
@@ -73,4 +48,12 @@ char *u_to_str(unsigned int u) {
   ft_rev_str(s);
 
   return (s);
+}
+
+int replace(char **src, char *new) {
+  if (!new)
+    return (0);
+  free(*src);
+  *src = new;
+  return (1);
 }
