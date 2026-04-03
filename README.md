@@ -54,6 +54,7 @@ make re     # fclean + make
 ## Tests
 The project has been tested using:
  - https://github.com/Tripouille/printfTester
+ - https://github.com/paulo-santana/ft_printf_tester (THANK YOU for that lib!)
 
 ## Notes
 
