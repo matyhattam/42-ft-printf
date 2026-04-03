@@ -9,19 +9,18 @@ char *apply_width(t_format *fmt, char *input, size_t input_len) {
   if (!buffer)
     return (NULL);
 
-  int is_zpadded = fmt->zero_padding && !fmt->force_sign &&
-                   !fmt->alternate_form && !fmt->justify_left &&
-                   !fmt->has_precision;
+  int is_zpadded = fmt->z_padding && !fmt->f_sign && !fmt->alt_form &&
+                   !fmt->justify && !fmt->has_precision;
   ft_memset(buffer, is_zpadded ? '0' : ' ', width - input_len);
   buffer[width - input_len] = '\0';
 
-  if (fmt->is_neg && fmt->zero_padding && !fmt->has_precision) {
+  if (fmt->is_neg && fmt->z_padding && !fmt->has_precision) {
     buffer[0] = '-';
     input[0] = '0';
   }
 
   char *output =
-      fmt->justify_left ? ft_strjoin(input, buffer) : ft_strjoin(buffer, input);
+      fmt->justify ? ft_strjoin(input, buffer) : ft_strjoin(buffer, input);
 
   free(buffer);
   return (output);
@@ -36,7 +35,7 @@ char *apply_width_c(t_format *fmt, char *c) {
   ft_memset(buf, ' ', width);
   buf[width] = '\0';
 
-  if (fmt->justify_left)
+  if (fmt->justify)
     buf[0] = c[0];
   else
     buf[width - 1] = c[0];
@@ -85,9 +84,9 @@ char *apply_force_sign(char *s, t_format *fmt) {
   if (!s)
     return (NULL);
 
-  if (fmt->sign_space && !fmt->force_sign && !fmt->is_neg)
+  if (fmt->s_space && !fmt->f_sign && !fmt->is_neg)
     out = ft_strjoin(" ", s);
-  else if (fmt->force_sign && !fmt->is_neg)
+  else if (fmt->f_sign && !fmt->is_neg)
     out = ft_strjoin("+", s);
   else
     return (ft_strdup(s));
@@ -115,7 +114,7 @@ char *format_d(int d, t_format *fmt) {
   if (fmt->is_neg)
     if (!replace(&s, ft_strjoin("-", s)))
       return (NULL);
-  if (fmt->force_sign || fmt->sign_space)
+  if (fmt->f_sign || fmt->s_space)
     if (!replace(&s, apply_force_sign(s, fmt)))
       return (NULL);
   if (fmt->width)
@@ -194,7 +193,7 @@ char *format_x(va_list *ap, t_format *fmt, int is_p) {
   if (fmt->has_precision && !is_p)
     if (!replace(&hex, apply_precision(fmt, hex, ft_strlen(hex))))
       return (NULL);
-  if ((fmt->alternate_form && x != 0) || (x != 0 && is_p))
+  if ((fmt->alt_form && x != 0) || (x != 0 && is_p))
     if (!replace(&hex, ft_strjoin("0x", hex)))
       return (NULL);
   if (fmt->width)

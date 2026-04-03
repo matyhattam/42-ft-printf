@@ -71,15 +71,15 @@ int parse_fmt(const char *conv_spec, va_list *ap) {
 
 void set_flags(t_format *format, const char *conv_spec) {
   if (*conv_spec == '-')
-    format->justify_left = 1;
+    format->justify = 1;
   else if (*conv_spec == '+')
-    format->force_sign = 1;
+    format->f_sign = 1;
   else if (*conv_spec == ' ')
-    format->sign_space = 1;
+    format->s_space = 1;
   else if (*conv_spec == '0')
-    format->zero_padding = 1;
+    format->z_padding = 1;
   else if (*conv_spec == '#')
-    format->alternate_form = 1;
+    format->alt_form = 1;
 }
 
 int parse_w_p(int *fmt_field, const char *conv_spec) {

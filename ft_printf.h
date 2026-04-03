@@ -8,15 +8,15 @@
 #include <unistd.h>
 
 typedef struct s_format {
-  int justify_left;
-  int force_sign;
-  int sign_space;
-  int zero_padding;
-  int alternate_form;
-  int width;
-  int precision;
-  int has_precision;
+  int alt_form;
+  int f_sign;
+  int s_space;
   int is_neg;
+  int has_precision;
+  int precision;
+  int width;
+  int z_padding;
+  int justify;
   char specifier;
 } t_format;
 
@@ -28,21 +28,19 @@ void set_flags(t_format *format, const char *conv_spec);
 
 // ft_formatting_utils
 char *apply_force_sign(char *s, t_format *fmt);
+char *apply_precision(t_format *fmt, char *input, size_t input_len);
 char *apply_width(t_format *fmt, char *input, size_t input_len);
 char *apply_width_c(t_format *fmt, char *c);
-char *apply_precision(t_format *fmt, char *input, size_t input_len);
 char *format_c(int c, t_format *fmt);
 char *format_d(int d, t_format *fmt);
 char *format_s(char *s, t_format *fmt);
-char *format_x(va_list *ap, t_format *fmt, int is_p);
 char *format_u(unsigned int u, t_format *fmt);
+char *format_x(va_list *ap, t_format *fmt, int is_p);
 
 // ft_printf_utils
 char *char_to_str(int c);
 t_format *create_struct();
 void ft_rev_str(char *s);
-void set_flags(t_format *format, const char *conv_spec);
-int parse_w_p(int *fmt_field, const char *conv_spec);
 char *ft_to_hex(unsigned long x);
 int replace(char **src, char *new);
 void to_upper(char *hex);
