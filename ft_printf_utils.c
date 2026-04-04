@@ -10,7 +10,7 @@ int replace(char **src, char *new) {
   return (1);
 }
 
-char *char_to_str(int c) {
+char *ft_ctostr(int c) {
   char *s = malloc(2);
   if (!s)
     return NULL;
@@ -32,7 +32,7 @@ int ulen(unsigned int u) {
   return (len);
 }
 
-char *u_to_str(unsigned int u) {
+char *ft_utostr(unsigned int u) {
   int i = 0;
   char base10[] = "0123456789";
 
@@ -70,7 +70,7 @@ int xlen(unsigned long x) {
   return (len);
 }
 
-char *ft_to_hex(unsigned long x) {
+char *ft_tohex(unsigned long x) {
   int i = 0;
   char hex_digits[] = "0123456789abcdef";
 
@@ -89,6 +89,7 @@ char *ft_to_hex(unsigned long x) {
     x /= 16;
     i++;
   }
+
   hex[i] = '\0';
   ft_rev_str(hex);
 

@@ -38,13 +38,13 @@ char *format_u(unsigned int u, t_format *fmt);
 char *format_x(va_list *ap, t_format *fmt, int is_p);
 
 // ft_printf_utils
-char *char_to_str(int c);
+char *ft_ctostr(int c);
 t_format *create_struct();
 void ft_rev_str(char *s);
-char *ft_to_hex(unsigned long x);
+char *ft_tohex(unsigned long x);
 int replace(char **src, char *new);
 void to_upper(char *hex);
-char *u_to_str(unsigned int u);
+char *ft_utostr(unsigned int u);
 
 // libft
 int ft_atoi(const char *nstr);

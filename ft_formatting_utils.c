@@ -155,7 +155,7 @@ char *format_c(int c, t_format *fmt) {
       return (NULL);
     s[0] = '\0';
   } else {
-    s = char_to_str(c);
+    s = ft_ctostr(c);
   }
 
   if (!s)
@@ -179,7 +179,7 @@ char *format_x(va_list *ap, t_format *fmt, int is_p) {
   if (x == 0 && is_p) {
     hex = ft_strdup("(nil)");
   } else {
-    hex = ft_to_hex(x);
+    hex = ft_tohex(x);
   }
 
   if (!hex)
@@ -206,7 +206,7 @@ char *format_x(va_list *ap, t_format *fmt, int is_p) {
 }
 
 char *format_u(unsigned int u, t_format *fmt) {
-  char *s = u_to_str(u);
+  char *s = ft_utostr(u);
   if (!s)
     return (NULL);
 
