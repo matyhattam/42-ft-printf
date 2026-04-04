@@ -17,7 +17,7 @@ char *parse_specs(t_format *fmt, va_list *ap) {
   return (NULL);
 }
 
-int parse_fmt(const char *conv_spec, va_list *ap) {
+int parse_fmt(const char *fmt_specs, va_list *ap) {
   int offset = 0;
   int len = 0;
   int bytes = 0;
@@ -25,25 +25,25 @@ int parse_fmt(const char *conv_spec, va_list *ap) {
   if (!fmt)
     return (0);
 
-  while (*conv_spec) {
-    if (ft_strchr("-+ 0#", *conv_spec)) {
-      set_flags(fmt, conv_spec);
-    } else if (ft_strchr("0123456789", *conv_spec)) {
-      offset = parse_w_p(&fmt->width, conv_spec);
-      conv_spec += offset;
+  while (*fmt_specs) {
+    if (ft_strchr("-+ 0#", *fmt_specs)) {
+      set_flags(fmt, fmt_specs);
+    } else if (ft_strchr("0123456789", *fmt_specs)) {
+      offset = parse_w_p(&fmt->width, fmt_specs);
+      fmt_specs += offset;
       continue;
-    } else if (*conv_spec == '.') {
-      conv_spec++;
+    } else if (*fmt_specs == '.') {
+      fmt_specs++;
       fmt->has_precision = 1;
-      offset = parse_w_p(&fmt->precision, conv_spec);
-      conv_spec += offset;
+      offset = parse_w_p(&fmt->precision, fmt_specs);
+      fmt_specs += offset;
       continue;
-    } else if (*conv_spec == '%') {
+    } else if (*fmt_specs == '%') {
       write(1, "%", 1);
       free(fmt);
       return (1);
-    } else if (ft_strchr("cspdiuxX", *conv_spec)) {
-      fmt->specifier = *conv_spec;
+    } else if (ft_strchr("cspdiuxX", *fmt_specs)) {
+      fmt->specifier = *fmt_specs;
       char *output = parse_specs(fmt, ap);
       if (!output) {
         free(fmt);
@@ -62,7 +62,7 @@ int parse_fmt(const char *conv_spec, va_list *ap) {
       free(fmt);
       return (len);
     }
-    conv_spec++;
+    fmt_specs++;
   }
 
   free(fmt);

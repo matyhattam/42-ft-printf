@@ -57,3 +57,49 @@ char *u_to_str(unsigned int u) {
 
   return (s);
 }
+
+int xlen(unsigned long x) {
+  int len = 0;
+  unsigned long tmp = x;
+  if (tmp == 0)
+    len = 1;
+  while (tmp != 0) {
+    tmp /= 16;
+    len++;
+  }
+  return (len);
+}
+
+char *ft_to_hex(unsigned long x) {
+  int i = 0;
+  char hex_digits[] = "0123456789abcdef";
+
+  char *hex = malloc(xlen(x) + 1);
+  if (!hex)
+    return (NULL);
+
+  if (x == 0) {
+    hex[0] = '0';
+    hex[1] = '\0';
+    return (hex);
+  }
+
+  while (x != 0) {
+    hex[i] = hex_digits[x % 16];
+    x /= 16;
+    i++;
+  }
+  hex[i] = '\0';
+  ft_rev_str(hex);
+
+  return (hex);
+}
+
+void to_upper(char *hex) {
+  int i = 0;
+  while (hex[i] != '\0') {
+    if ((hex[i] >= 'a' && hex[i] <= 'f') || hex[i] == 'x')
+      hex[i] -= 32;
+    i++;
+  }
+}
