@@ -1,4 +1,4 @@
-#include "ft_printf.h"
+#include "../ft_printf.h"
 
 char *apply_width(t_format *fmt, char *input, size_t input_len) {
   size_t width = fmt->width;

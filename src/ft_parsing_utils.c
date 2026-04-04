@@ -1,4 +1,4 @@
-#include "ft_printf.h"
+#include "../ft_printf.h"
 
 char *parse_specs(t_format *fmt, va_list *ap) {
   if (fmt->specifier == 'c') {

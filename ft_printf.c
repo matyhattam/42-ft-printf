@@ -59,5 +59,5 @@ int ft_printf(const char *s, ...) {
 // int main(void) {
 //   ft_printf("%-2c%-3c%-4c*", 0, 'a', 0);
 //   printf("------------------------ \n");
-//   ft_printf("%-2c%-3c%-4c*", 0, 'a', 0);
+//   printf("%-2c%-3c%-4c*", 0, 'a', 0);
 // }

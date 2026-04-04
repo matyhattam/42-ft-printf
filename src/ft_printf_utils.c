@@ -1,4 +1,4 @@
-#include "ft_printf.h"
+#include "../ft_printf.h"
 
 t_format *create_struct() { return (ft_calloc(1, sizeof(t_format))); }
 
