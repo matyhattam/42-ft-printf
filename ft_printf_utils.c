@@ -20,7 +20,7 @@ char *ft_ctostr(int c) {
   return s;
 }
 
-int ulen(unsigned int u) {
+int ft_ulen(unsigned int u) {
   int len = 0;
   unsigned int tmp = u;
   if (tmp == 0)
@@ -36,7 +36,7 @@ char *ft_utostr(unsigned int u) {
   int i = 0;
   char base10[] = "0123456789";
 
-  char *s = malloc(ulen(u) + 1);
+  char *s = malloc(ft_ulen(u) + 1);
   if (!s)
     return (NULL);
 
@@ -53,12 +53,12 @@ char *ft_utostr(unsigned int u) {
   }
 
   s[i] = '\0';
-  ft_rev_str(s);
+  ft_revstr(s);
 
   return (s);
 }
 
-int xlen(unsigned long x) {
+int ft_xlen(unsigned long x) {
   int len = 0;
   unsigned long tmp = x;
   if (tmp == 0)
@@ -74,7 +74,7 @@ char *ft_tohex(unsigned long x) {
   int i = 0;
   char hex_digits[] = "0123456789abcdef";
 
-  char *hex = malloc(xlen(x) + 1);
+  char *hex = malloc(ft_xlen(x) + 1);
   if (!hex)
     return (NULL);
 
@@ -91,7 +91,7 @@ char *ft_tohex(unsigned long x) {
   }
 
   hex[i] = '\0';
-  ft_rev_str(hex);
+  ft_revstr(hex);
 
   return (hex);
 }

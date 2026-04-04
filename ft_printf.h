@@ -40,7 +40,7 @@ char *format_x(va_list *ap, t_format *fmt, int is_p);
 // ft_printf_utils
 char *ft_ctostr(int c);
 t_format *create_struct();
-void ft_rev_str(char *s);
+void ft_revstr(char *s);
 char *ft_tohex(unsigned long x);
 int replace(char **src, char *new);
 void to_upper(char *hex);

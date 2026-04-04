@@ -13,7 +13,7 @@ int num_size(int n) {
   return (i);
 }
 
-void ft_rev_str(char *s) {
+void ft_revstr(char *s) {
   size_t s_len = ft_strlen(s);
   size_t i = 0;
   size_t j = s_len - 1;
@@ -54,7 +54,7 @@ char *ft_itoa(int n) {
     nstr[i] = '-';
 
   nstr[i] = '\0';
-  ft_rev_str(nstr);
+  ft_revstr(nstr);
 
   return (nstr);
 }
